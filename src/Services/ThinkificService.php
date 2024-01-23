@@ -13,7 +13,7 @@ final class ThinkificService implements Thinkific
     use MapperTrait;
 
     private string $api_key;
-    private string $subdomain;
+    public string $subdomain;
     public bool $is_oauth;
     public BundleService $bundles;
 
@@ -47,6 +47,7 @@ final class ThinkificService implements Thinkific
 
     public UserService $users;
     public WebhookService $webhooks;
+    public OAuthService $oauth;
 
 
     public function __construct(string $api_key, string $subdomain, bool $is_oauth = false)
@@ -71,6 +72,7 @@ final class ThinkificService implements Thinkific
         $this->site_scripts = new SiteScriptService($this);
         $this->users = new UserService($this);
         $this->webhooks = new WebhookService($this);
+        $this->oauth = new OAuthService($this);
     }
 
     /**
