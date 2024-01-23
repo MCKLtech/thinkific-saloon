@@ -5,29 +5,49 @@ namespace WooNinja\ThinkificSaloon\Services;
 use WooNinja\ThinkificSaloon\Auth\ThinkificAuthenticator;
 use WooNinja\ThinkificSaloon\Connectors\ThinkificConnector;
 use WooNinja\ThinkificSaloon\Interfaces\Thinkific;
+use WooNinja\ThinkificSaloon\Requests\CustomProfileFieldDefinitions\CustomProfileFieldDefinition;
+use WooNinja\ThinkificSaloon\Traits\MapperTrait;
 
 final class ThinkificService implements Thinkific
 {
+    use MapperTrait;
+
     private string $api_key;
     private string $subdomain;
     private bool $is_oauth;
-
     public BundleService $bundles;
-    public CourseService $courses;
+
+    //CategoriesService
     public ChapterService $chapters;
+
+    //CategoryMembershipsService
     public ContentService $contents;
 
     public CouponService $coupons;
+    public CourseService $courses;
+    public CourseReviewService $course_reviews;
+    public CustomProfileFieldDefinitionService $custom_profile_field_definitions;
+
+    public EnrollmentService $enrollments;
+
+    //ExternalOrderService
+
+    public GroupService $groups;
+
+    public InstructorService $instructors;
+
+    public OrderService $orders;
+
+    //ProductPublishRequestService
+
+    public ProductService $products;
 
     public PromotionService $promotions;
 
-    public EnrollmentService $enrollments;
-    public ProductService $products;
-    public OrderService $orders;
+    //SiteScriptService
 
     public UserService $users;
 
-    public GroupService $groups;
 
     public function __construct(string $api_key, string $subdomain, bool $is_oauth = false)
     {
@@ -36,22 +56,30 @@ final class ThinkificService implements Thinkific
         $this->is_oauth = $is_oauth;
 
         $this->bundles = new BundleService($this);
-        $this->courses = new CourseService($this);
         $this->chapters = new ChapterService($this);
         $this->contents = new ContentService($this);
         $this->coupons = new CouponService($this);
-        $this->promotions = new PromotionService($this);
+        $this->courses = new CourseService($this);
+        $this->course_reviews = new CourseReviewService($this);
+        $this->custom_profile_field_definitions = new CustomProfileFieldDefinitionService($this);
         $this->enrollments = new EnrollmentService($this);
-        $this->products = new ProductService($this);
-        $this->orders = new OrderService($this);
-        $this->users = new UserService($this);
         $this->groups = new GroupService($this);
+        $this->instructors = new InstructorService($this);
+        $this->orders = new OrderService($this);
+        $this->products = new ProductService($this);
+        $this->promotions = new PromotionService($this);
+        $this->users = new UserService($this);
     }
 
     public function connector(): ThinkificConnector
     {
         return (new ThinkificConnector($this->subdomain))
-            ->authenticate(new ThinkificAuthenticator($this->api_key, $this->subdomain, $this->is_oauth));
+            ->authenticate(
+                new ThinkificAuthenticator(
+                    $this->api_key,
+                    $this->subdomain,
+                    $this->is_oauth)
+            );
 
     }
 

@@ -40,7 +40,6 @@ class ThinkificConnector extends Connector implements HasPagination
 
     protected function defaultHeaders(): array
     {
-
         return [
             'User-Agent' => 'WooNinja/Saloon-PHP-SDK'
         ];
@@ -64,7 +63,7 @@ class ThinkificConnector extends Connector implements HasPagination
     }
 
     /**
-     * Set the rate limit. Thinkific defaults to 120 requests per minute.
+     * Dynamically set the rate limit. All Thinkific plans default to 120 requests per minute.
      * For Thinkific Plus, this can be increased to 1,000 requests per minute. (Approval is required from Thinkific)
      *
      * @param int $limit
@@ -78,13 +77,13 @@ class ThinkificConnector extends Connector implements HasPagination
     protected function getLimiterPrefix(): ?string
     {
         return (new ReflectionClass($this))->getShortName()
-            . ':subdomain_'.$this->subdomain;
+            . ':subdomain_' . $this->subdomain;
     }
 
     protected function resolveLimits(): array
     {
         return [
-            Limit::allow(requests: $this->rateLimit)->everyMinute()
+            Limit::allow(requests: $this->rateLimit, threshold: 0.95)->everyMinute()
         ];
     }
 

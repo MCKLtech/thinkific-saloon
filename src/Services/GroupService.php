@@ -129,15 +129,15 @@ class GroupService extends Resource
      * @see https://developers.thinkific.com/api/api-documentation/#/Groups/postGroupAnalysts
      *
      * @param int $group_id
-     * @param array $analyst_ids
+     * @param array $user_ids
      * @return Response
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function assignAnalysts(int $group_id, array $analyst_ids): Response
+    public function assignAnalysts(int $group_id, array $user_ids): Response
     {
         return $this->connector
-            ->send(new AssignAnalysts($group_id, $analyst_ids));
+            ->send(new AssignAnalysts($group_id, $user_ids));
     }
 
     /**

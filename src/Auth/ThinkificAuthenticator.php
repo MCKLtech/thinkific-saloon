@@ -7,7 +7,11 @@ use Saloon\Http\PendingRequest;
 class ThinkificAuthenticator implements Authenticator
 {
 
-    public function __construct(private string $api_key, private string $subdomain, private bool $is_oauth = false)
+    public function __construct(
+        private readonly string $api_key,
+        private readonly string $subdomain,
+        private readonly bool   $is_oauth = false
+    )
     {
     }
 

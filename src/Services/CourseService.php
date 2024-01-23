@@ -52,5 +52,4 @@ class CourseService extends Resource
             ->paginate(new Chapters($productable_id));
     }
 
-
 }
