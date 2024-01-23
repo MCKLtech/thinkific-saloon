@@ -14,7 +14,7 @@ final class ThinkificService implements Thinkific
 
     private string $api_key;
     private string $subdomain;
-    private bool $is_oauth;
+    public bool $is_oauth;
     public BundleService $bundles;
 
     //CategoriesService
@@ -43,10 +43,10 @@ final class ThinkificService implements Thinkific
     public ProductService $products;
 
     public PromotionService $promotions;
-
-    //SiteScriptService
+    public SiteScriptService $site_scripts;
 
     public UserService $users;
+    public WebhookService $webhooks;
 
 
     public function __construct(string $api_key, string $subdomain, bool $is_oauth = false)
@@ -68,9 +68,14 @@ final class ThinkificService implements Thinkific
         $this->orders = new OrderService($this);
         $this->products = new ProductService($this);
         $this->promotions = new PromotionService($this);
+        $this->site_scripts = new SiteScriptService($this);
         $this->users = new UserService($this);
+        $this->webhooks = new WebhookService($this);
     }
 
+    /**
+     * @return ThinkificConnector
+     */
     public function connector(): ThinkificConnector
     {
         return (new ThinkificConnector($this->subdomain))
@@ -78,7 +83,8 @@ final class ThinkificService implements Thinkific
                 new ThinkificAuthenticator(
                     $this->api_key,
                     $this->subdomain,
-                    $this->is_oauth)
+                    $this->is_oauth
+                )
             );
 
     }

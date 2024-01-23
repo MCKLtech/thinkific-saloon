@@ -26,6 +26,8 @@ class ThinkificConnector extends Connector implements HasPagination
 
     public int $rateLimit = 120;
 
+    public string $base_url = 'https://api.thinkific.com/api/public/v1/';
+
     public function __construct(
         protected string $subdomain
     )
@@ -35,7 +37,7 @@ class ThinkificConnector extends Connector implements HasPagination
 
     public function resolveBaseUrl(): string
     {
-        return 'https://api.thinkific.com/api/public/v1/';
+        return $this->base_url;
     }
 
     protected function defaultHeaders(): array
@@ -48,6 +50,17 @@ class ThinkificConnector extends Connector implements HasPagination
     protected function defaultConfig(): array
     {
         return [];
+    }
+
+    /**
+     * Dynamically change the URL
+     *
+     * @param string $url
+     * @return void
+     */
+    public function setBaseURL(string $url): void
+    {
+        $this->base_url = $url;
     }
 
     /**
@@ -80,6 +93,11 @@ class ThinkificConnector extends Connector implements HasPagination
             . ':subdomain_' . $this->subdomain;
     }
 
+    /**
+     * Rate limits for Thinkific. Default to 120/requests per minute.
+     *
+     * @return array
+     */
     protected function resolveLimits(): array
     {
         return [
@@ -87,6 +105,11 @@ class ThinkificConnector extends Connector implements HasPagination
         ];
     }
 
+    /**
+     * The Rate Limit Store for Saloon
+     *
+     * @return RateLimitStore
+     */
     protected function resolveRateLimitStore(): RateLimitStore
     {
         if ($this->rateStore) return $this->rateStore;
@@ -94,6 +117,12 @@ class ThinkificConnector extends Connector implements HasPagination
         return new MemoryStore();
     }
 
+    /**
+     * Pagination configuration for Thinkific
+     *
+     * @param Request $request
+     * @return PagedPaginator
+     */
     public function paginate(Request $request): PagedPaginator
     {
         return new class(connector: $this, request: $request) extends PagedPaginator {

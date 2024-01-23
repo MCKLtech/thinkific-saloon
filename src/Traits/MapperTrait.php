@@ -10,7 +10,7 @@ trait MapperTrait
 {
     /**
      * Attempts to map a source DTO to a target DTO
-     * 
+     *
      * @param $sourceDTO
      * @param $targetDTO
      * @return mixed
