@@ -2,6 +2,7 @@
 
 namespace WooNinja\ThinkificSaloon\Services;
 
+use Saloon\Contracts\Authenticator;
 use WooNinja\ThinkificSaloon\Auth\ThinkificAuthenticator;
 use WooNinja\ThinkificSaloon\Connectors\ThinkificConnector;
 use WooNinja\ThinkificSaloon\Interfaces\Thinkific;
@@ -15,6 +16,7 @@ final class ThinkificService implements Thinkific
     private string $api_key;
     public string $subdomain;
     public bool $is_oauth;
+
     public BundleService $bundles;
 
     //CategoriesService
@@ -35,7 +37,6 @@ final class ThinkificService implements Thinkific
     public GroupService $groups;
 
     public InstructorService $instructors;
-
     public OrderService $orders;
 
     //ProductPublishRequestService
@@ -46,9 +47,13 @@ final class ThinkificService implements Thinkific
     public SiteScriptService $site_scripts;
 
     public UserService $users;
+
     public WebhookService $webhooks;
     public OAuthService $oauth;
 
+    private ThinkificConnector|bool $connector = false;
+
+    private Authenticator|bool $authenticator = false;
 
     public function __construct(string $api_key, string $subdomain, bool $is_oauth = false)
     {
@@ -80,15 +85,54 @@ final class ThinkificService implements Thinkific
      */
     public function connector(): ThinkificConnector
     {
-        return (new ThinkificConnector($this->subdomain))
-            ->authenticate(
-                new ThinkificAuthenticator(
-                    $this->api_key,
-                    $this->subdomain,
-                    $this->is_oauth
-                )
-            );
+        if ($this->connector) {
+            return $this->connector;
+        }
 
+        /**
+         * Default Connector
+         */
+        return (new ThinkificConnector($this->subdomain))
+            ->authenticate($this->authenticator());
+
+    }
+
+    /**
+     * @return Authenticator
+     */
+    public function authenticator(): Authenticator
+    {
+        if ($this->authenticator) {
+            return $this->authenticator;
+        }
+
+        return new ThinkificAuthenticator(
+            $this->api_key,
+            $this->subdomain,
+            $this->is_oauth
+        );
+    }
+
+    /**
+     * Dynamically set the Connector
+     *
+     * @param ThinkificConnector $connector
+     * @return void
+     */
+    public function setConnector(ThinkificConnector $connector): void
+    {
+        $this->connector = $connector;
+    }
+
+    /**
+     * Dynamically set the Authenticator
+     *
+     * @param Authenticator $authenticator
+     * @return void
+     */
+    public function setAuthenticator(Authenticator $authenticator): void
+    {
+        $this->authenticator = $authenticator;
     }
 
 }
