@@ -23,5 +23,6 @@
       "WooNinja\\ThinkificSaloon\\": "src/"
     }
   },
-  "minimum-stability": "stable"
+  "minimum-stability" : "dev",
+  "prefer-stable" : true
 }
