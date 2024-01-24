@@ -1,5 +1,5 @@
 {
-  "name": "wooninja/thinkific-saloon",
+  "name": "mckltech/thinkific-saloon",
   "description": "PHP Library for the Thinkific API using Saloon",
   "authors": [
     {
@@ -22,5 +22,6 @@
     "psr-4": {
       "WooNinja\\ThinkificSaloon\\": "src/"
     }
-  }
+  },
+  "minimum-stability": "stable"
 }

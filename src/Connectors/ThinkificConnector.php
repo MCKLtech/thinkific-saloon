@@ -89,8 +89,7 @@ class ThinkificConnector extends Connector implements HasPagination
 
     protected function getLimiterPrefix(): ?string
     {
-        return (new ReflectionClass($this))->getShortName()
-            . ':subdomain_' . $this->subdomain;
+        return "thinkific_subdomain_{$this->subdomain}";
     }
 
     /**

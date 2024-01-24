@@ -1,4 +1,4 @@
-# wooninja-thinkific-saloon
+# thinkific-saloon
 
 A PHP SDK for the Thinkific API implemented using Saloon
 
@@ -7,26 +7,24 @@ A PHP SDK for the Thinkific API implemented using Saloon
 I wrote my original PHP library for Thinkific in ~2019 and since then there have been some major improvements in both
 PHP and libraries such as Saloon. With that in mind, I wanted to make the library more robust, strongly typed and easier
 to maintain. In addition, Saloon has inbuilt support for pagination and rate limiting, lowering technical overhead when
-dealing with busy integration scenarios.
+dealing with high traffic integration scenarios.
 
 ## REST vs GraphQL
 
 At time of writing (Jan 2024), Thinkific is slowly introducing a GraphQL API. This GraphQL API does not currently
 replicate the complete functionality of the REST API. The intention of this library is to abstract the underlying API
-call, meaning as and when GraphQL matures, end points will be updated to make use them where applicable.
+call, meaning as and when GraphQL matures, end points will be updated to make use them where applicable with the confidence that the interface to PHP will remain the same.
 
 ## Installation
 
-This library requires PHP 8.0 and later
-
-The recommended way to install is using Composer
-
-NOte: This library is intended to speed up development time but is not a shortcut to reading the Thinkific
+* This library requires PHP 8.0 and later
+* The recommended way to install is using Composer
+* This library is intended to speed up development time but is not a shortcut to reading the Thinkific
 documentation. Many endpoints require specific and required fields for successful operation. Always read the
 documentation before using an endpoint.
 
 ```sh
-composer require mckltech/wooninja-thinkific-saloon
+composer require mckltech/thinkific-saloon
 ```
 
 ## Data Transfer Objects (DTOs)
@@ -50,7 +48,6 @@ $client = new \WooNinja\ThinkificSaloon\Services\ThinkificService(
 
 > - You can find your API Key by following the Thinkific API
     documentation: https://developers.thinkific.com/api/api-key-auth
->
 > - For your subdomain, do not include .thinkific.com. For example, if your subdomain is example.thinkific.com, then you
     would use 'example' in your ThinkificClient set up. If you are using a custom domain, you should retrieve your
     Thinkific sub-domain from your Thinkific dashboard.
@@ -63,7 +60,7 @@ e.g. Laravel Socialite
 
 ```php
 $client = new \WooNinja\ThinkificSaloon\Services\ThinkificService(
-  "XXXX428d55aabXXXXX68c0fXXXX",
+  "API Key OR OAuth Access Token",
   "example-school-123",
   true
 );
@@ -141,6 +138,12 @@ documentation prior to use as there are numerous required fields for most POST/P
 - Users
 - Webhooks
 - OAuth Helper (Refresh Token Only)
+
+## Additional Features
+
+- Helper methods e.g. find() and findByEmail() in User endpoints
+- WordPressRateLimitStore for Rate Limiting in WordPress Environments (Uses WP Transients)
+- MapperTrait to transfer between DTOs e.g. CreateUser -> UpdateUser
 
 ## Exceptions
 
