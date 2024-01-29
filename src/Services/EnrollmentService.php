@@ -5,6 +5,7 @@ namespace WooNinja\ThinkificSaloon\Services;
 use Carbon\Carbon;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
+use Saloon\Http\Response;
 use Saloon\PaginationPlugin\PagedPaginator;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\CreateEnrollment;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
@@ -67,26 +68,25 @@ class EnrollmentService extends Resource
      * @see https://developers.thinkific.com/api/api-documentation/#/Enrollments/updateEnrollment
      *
      * @param UpdateEnrollment $enrollment
-     * @return Enrollment
+     * @return Response
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function update(UpdateEnrollment $enrollment): Enrollment
+    public function update(UpdateEnrollment $enrollment): Response
     {
         return $this->connector
-            ->send(new Update($enrollment))
-            ->dtoOrFail();
+            ->send(new Update($enrollment));
     }
 
     /**
      * Expire an Enrollment
      *
      * @param int $enrollment_id
-     * @return Enrollment
+     * @return Response
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function expire(int $enrollment_id): Enrollment
+    public function expire(int $enrollment_id): Response
     {
         $enrollment = new UpdateEnrollment(
             enrollment_id: $enrollment_id,
