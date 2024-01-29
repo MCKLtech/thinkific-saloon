@@ -136,6 +136,7 @@ class ThinkificConnector extends Connector implements HasPagination
             {
                 return $response->dto();
             }
+
         };
     }
 

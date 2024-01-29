@@ -103,7 +103,7 @@ class BundleService extends Resource
             productable_id: $productable_id,
             user_id: $user_id,
             activated_at: null,
-            expires_at: Carbon::now()->startOfDay()->subSecond(),
+            expiry_date: Carbon::now()->startOfDay()->subSecond(),
         );
 
         return $this->connector
@@ -117,9 +117,9 @@ class BundleService extends Resource
      * @param int|string $user_id_or_email
      * @return bool
      */
-    public function isUserEnrolled(int $productable_id, int|string $user_id_or_email): bool
+    public function isUserEnrolled(int $productable_id, int|string $user_id_or_email, array $filters = []): bool
     {
-        if(is_numeric($user_id_or_email)) {
+        if (is_numeric($user_id_or_email)) {
             $filters = [
                 'query[user_id]' => $user_id_or_email,
             ];
@@ -129,8 +129,13 @@ class BundleService extends Resource
             ];
         }
 
+        /**
+         * Avoid Excessive API Calls by limiting to 100
+         */
+        $filters['limit'] = 100;
+
         $enrollments = $this->enrollments($productable_id, $filters);
 
-        return $enrollments->getTotalResults() > 0;
+        return $enrollments->collect()->count() > 0;
     }
 }
