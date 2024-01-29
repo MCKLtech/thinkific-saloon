@@ -107,14 +107,19 @@ class UserService extends Resource
     }
 
     /**
-     * Get a user by email
+     * Get a user by exact email
      *
      * @param string $email
      * @return User|null
      */
     public function findByEmail(string $email): User|null
     {
-        $users = $this->users(['query[email]' => $email]);
+        $users = $this->users(
+            [
+                'query[email]' => $email,
+                'limit' => 1
+            ]
+        );
 
         if ($users->count() > 0) {
             return $users->collect()->first();
