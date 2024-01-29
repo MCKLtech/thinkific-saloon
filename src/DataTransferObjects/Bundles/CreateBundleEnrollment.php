@@ -10,7 +10,7 @@ final class CreateBundleEnrollment
         public int $productable_id,
         public int $user_id,
         public ?Carbon $activated_at,
-        public ?Carbon $expires_at,
+        public ?Carbon $expiry_date,
     ) {}
 
 }

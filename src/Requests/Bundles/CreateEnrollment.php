@@ -30,7 +30,7 @@ final class CreateEnrollment extends Request implements HasBody
         $body = [
             'user_id' => $this->createBundleEnrollment->user_id,
             'activated_at' => $this->createBundleEnrollment->activated_at?->toIso8601String(),
-            'expires_at' => $this->createBundleEnrollment->expires_at?->toIso8601String(),
+            'expiry_date' => $this->createBundleEnrollment->expiry_date?->toIso8601String(),
         ];
 
         return array_filter($body, fn($value) => $value !== null);

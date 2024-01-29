@@ -31,7 +31,7 @@ final class UpdateEnrollment extends Request implements HasBody
         $body = [
             'user_id' => $this->updateBundleEnrollment->user_id,
             'activated_at' => $this->updateBundleEnrollment->activated_at?->toIso8601String(),
-            'expires_at' => $this->updateBundleEnrollment->expires_at?->toIso8601String(),
+            'expiry_date' => $this->updateBundleEnrollment->expiry_date?->toIso8601String(),
         ];
 
         return array_filter($body, fn($value) => $value !== null);
