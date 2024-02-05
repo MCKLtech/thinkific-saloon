@@ -79,15 +79,14 @@ class PromotionService extends Resource
      * @see https://developers.thinkific.com/api/api-documentation/#/Promotions/updatePromotionByID
      *
      * @param UpdatePromotion $promotion
-     * @return Promotion
+     * @return Response
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function update(UpdatePromotion $promotion): Promotion
+    public function update(UpdatePromotion $promotion): Response
     {
         return $this->connector
-            ->send(new Update($promotion))
-            ->dtoOrFail();
+            ->send(new Update($promotion));
     }
 
     /**

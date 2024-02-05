@@ -4,6 +4,7 @@ namespace WooNinja\ThinkificSaloon\Services;
 
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
+use Saloon\Http\Response;
 use Saloon\PaginationPlugin\PagedPaginator;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Coupons\BulkCreateCoupon;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Coupons\Coupon;
@@ -87,7 +88,7 @@ class CouponService extends Resource
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function update(UpdateCoupon $coupon)
+    public function update(UpdateCoupon $coupon): Response
     {
         return $this->connector
             ->send(new Update($coupon));
@@ -98,11 +99,11 @@ class CouponService extends Resource
      * @see https://developers.thinkific.com/api/api-documentation/#/Coupons/deleteCouponByID
      *
      * @param int $coupon_id
-     * @return \Saloon\Http\Response
+     * @return Response
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function delete(int $coupon_id)
+    public function delete(int $coupon_id): Response
     {
         return $this->connector
             ->send(new Delete($coupon_id));
