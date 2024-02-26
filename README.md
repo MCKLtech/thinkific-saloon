@@ -13,15 +13,16 @@ dealing with high traffic integration scenarios.
 
 At time of writing (Jan 2024), Thinkific is slowly introducing a GraphQL API. This GraphQL API does not currently
 replicate the complete functionality of the REST API. The intention of this library is to abstract the underlying API
-call, meaning as and when GraphQL matures, end points will be updated to make use them where applicable with the confidence that the interface to PHP will remain the same.
+call, meaning as and when GraphQL matures, end points will be updated to make use them where applicable with the
+confidence that the interface to PHP will remain the same.
 
 ## Installation
 
 * This library requires PHP 8.0 and later
 * The recommended way to install is using Composer
 * This library is intended to speed up development time but is not a shortcut to reading the Thinkific
-documentation. Many endpoints require specific and required fields for successful operation. Always read the
-documentation before using an endpoint.
+  documentation. Many endpoints require specific and required fields for successful operation. Always read the
+  documentation before using an endpoint.
 
 ```sh
 composer require mckltech/thinkific-saloon
@@ -33,7 +34,8 @@ The library makes extensive use of DTOs for entities such a Users, Courses, Prod
 return a DTO or a collection of DTOs. The DTOs are strongly typed and will throw exceptions if required fields are not
 present, in addition to the request failing if no DTO can be created.
 
-When creating an entity, such as a User, or updating one, for example updating an enrollment, you will be required to pass a DTO. Again, these are strongly typed and will throw exceptions if required fields are not present.
+When creating an entity, such as a User, or updating one, for example updating an enrollment, you will be required to
+pass a DTO. Again, these are strongly typed and will throw exceptions if required fields are not present.
 
 ## Client - API Key
 
@@ -138,6 +140,108 @@ documentation prior to use as there are numerous required fields for most POST/P
 - Users
 - Webhooks
 - OAuth Helper (Refresh Token Only)
+  ID Conventions in the Thinkific API
+
+## Linking Products, Courses and Enrollments
+
+The Thinkific REST API uses a number of different IDs to link Courses, Products and Enrollments. Products, at time of
+writing, can either be Courses or Bundles.
+
+Given an **Enrollment**:
+
+````
+{
+            "id": 479110111,
+            "created_at": "2024-02-22T20:32:52.726Z",
+            "user_email": "noreply@example.com",
+            "user_name": "Colin",
+            "expiry_date": "2025-01-17T20:32:52.000Z",
+            "user_id": 193952525,
+            "course_name": "Corporate Course",
+            "course_id": 1264768, <-- The productable_id in /products and id in /courses
+            "percentage_completed": "0.0",
+            "completed_at": null,
+            "expired": false,
+            "is_free_trial": false,
+            "completed": false,
+            "started_at": null,
+            "activated_at": "2024-02-22T20:32:52.000Z",
+            "updated_at": "2024-02-22T20:32:52.730Z"
+        }
+````
+
+You can relate this **Enrollment** to a **Product**:
+
+````
+{
+            "id": 1325780, <-- The product_id in /courses
+            "created_at": "2021-03-04T21:30:50.243Z",
+            "productable_id": 1264768 <- The course_id in /enrollments & the id in /courses
+            "productable_type": "Course",
+            "price": "1.0",
+            "position": 13,
+            "status": "published",
+            "name": "Corporate Course",
+            "private": false,
+            "hidden": false,
+            "subscription": false,
+            "days_until_expiry": null,
+            "has_certificate": false,
+            "collection_ids": [],
+            "seo_title": null,
+            "seo_description": null,
+            "keywords": null,
+            "related_product_ids": [],
+            "slug": "your-first-course",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Unam incolunt Belgae, aliam Aquitani, tertiam. Cras mattis iudicium purus sit amet fermentum.",
+            ...
+        }
+````
+
+Which, in turn, can be related to a **Course**:
+
+````
+{
+            "id": 1264768, <-- The productable_id in /products and course_id in /enrollments
+            "name": "Corporate Course",
+            "slug": "your-first-course",
+            "subtitle": null,
+            "product_id": 1325780, <- The id in /products
+            "description": "Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Unam incolunt Belgae, aliam Aquitani, tertiam. Cras mattis iudicium purus sit amet fermentum.",
+            "intro_video_youtube": null,
+            "contact_information": null,
+            "keywords": null,
+            "duration": null,
+            ...
+        }
+````
+
+For a **Bundle**, they can be listed via an API request to:
+
+````
+e.g. https://api.thinkific.com/api/public/v1/bundles/120008
+````
+
+Where '120008' is the **productable_id** from a **Product**
+
+Which returns:
+
+````
+{
+    "id": 120008, <-- The productable_id in /products
+    "name": "Demo Bundle",
+    "description": null,
+    "banner_image_url": "/assets/tenant/default-course-banner.jpg",
+    "course_ids": [
+        1264768, <-- The productable_id in /products and id in /courses
+    ],
+    "bundle_card_image_url": "/assets/defaults/default-product-card.png",
+    "tagline": null,
+    "slug": "demo-bundle"
+}
+````
+
+When creating and updating enrollments, the **productable_id** from a **Product** should be used.
 
 ## Additional Features
 
