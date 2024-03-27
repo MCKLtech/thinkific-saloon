@@ -12,8 +12,7 @@
     "saloonphp/saloon": "^3.0",
     "saloonphp/pagination-plugin": "^2.2",
     "saloonphp/rate-limit-plugin": "^2.0",
-    "nesbot/carbon": "*",
-    "illuminate/collections": "*"
+    "nesbot/carbon": "*"
   },
   "require-dev": {
     "spatie/ray": "*"
