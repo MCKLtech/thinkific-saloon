@@ -147,9 +147,9 @@ class EnrollmentService extends Resource
      */
     public function isUserEnrolledInCourse(int|string $user_id_or_email, int $course_id, array $filters = []): bool
     {
-        $results = $this->enrollmentsForUserInCourse($user_id_or_email, $course_id, array_merge($filters, ['limit' => 1]));
-
-        return $results->collect()->count() > 0;
+        return $this->enrollmentsForUserInCourse($user_id_or_email, $course_id, array_merge($filters, ['limit' => 1]))
+                ->collect()
+                ->count() > 0;
     }
 
     /**

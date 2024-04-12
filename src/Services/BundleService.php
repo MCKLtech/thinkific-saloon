@@ -134,8 +134,8 @@ class BundleService extends Resource
          */
         $filters['limit'] = 100;
 
-        $enrollments = $this->enrollments($productable_id, $filters);
-
-        return $enrollments->collect()->count() > 0;
+        return $this->enrollments($productable_id, $filters)
+                ->collect()
+                ->count() > 0;
     }
 }

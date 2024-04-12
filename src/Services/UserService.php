@@ -119,10 +119,10 @@ class UserService extends Resource
                 'query[email]' => $email,
                 'limit' => 1
             ]
-        );
+        )->collect();
 
         if ($users->count() > 0) {
-            return $users->collect()->first();
+            return $users->first();
         }
 
         return null;
