@@ -3,18 +3,17 @@
 namespace WooNinja\ThinkificSaloon\Requests\OAuth;
 
 use Carbon\Carbon;
+use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
 use Saloon\Http\Response;
 use Saloon\Http\SoloRequest;
 use Saloon\Traits\Body\HasJsonBody;
 use \WooNinja\ThinkificSaloon\DataTransferObjects\OAuth\Refresh as RefreshDTO;
 use WooNinja\ThinkificSaloon\DataTransferObjects\OAuth\Token;
-use WooNinja\ThinkificSaloon\Traits\RequestTrait;
 
-class Refresh extends SoloRequest
+class Refresh extends SoloRequest implements HasBody
 {
     use HasJsonBody;
-    use RequestTrait;
 
     protected Method $method = Method::POST;
 
@@ -27,6 +26,7 @@ class Refresh extends SoloRequest
     public function resolveEndpoint(): string
     {
         return "https://" . $this->refresh->subdomain . ".thinkific.com/oauth2/token";
+
     }
 
     protected function defaultBody(): array
