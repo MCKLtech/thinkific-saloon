@@ -86,10 +86,16 @@ class GroupService extends Resource
      * @param $group_id
      * @return PagedPaginator
      */
-    public function users($group_id): PagedPaginator
+    public function users($group_id, array $params = []): PagedPaginator
     {
+        $filter = ['query[group_id]' => $group_id];
+
+        if(!empty($params)) {
+            $filter = array_merge($filter, $params);
+        }
+
         return $this->connector
-            ->paginate(new Users(['query[group_id]' => $group_id]));
+            ->paginate(new Users($filter));
     }
 
     /**
@@ -106,6 +112,29 @@ class GroupService extends Resource
     {
         return $this->connector
             ->send(new AddUser($user_id, $group_names));
+    }
+
+    /**
+     * Determine if a user is in a group
+     *
+     * @param int|string $user_id_or_email
+     * @param int $group_id
+     * @return bool
+     */
+    public function isUserInGroup(string $email, int $group_id): bool
+    {
+        $filter = [
+            'limit' => 1,
+            'query[email]' => $email
+        ];
+
+        $user = $this->users($group_id, $filter)->collect();
+
+        if($user->isEmpty()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
