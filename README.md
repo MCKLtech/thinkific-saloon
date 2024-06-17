@@ -68,6 +68,44 @@ $client = new \WooNinja\ThinkificSaloon\Services\ThinkificService(
 );
 ```
 
+
+## Client - GraphQL
+
+The library has basic support for GraphQL endpoints. Feel free to open a PR to add more, or request them via issues.
+
+Below is a theoretical example for interacting with the GraphQL API. Note carefully the ThinkificGraphQLService class and the use of an OAuth/private token. You cannot use an API Key with the GraphQL API.
+
+```php
+use WooNinja\ThinkificSaloon\GraphQL\Services\ThinkificGraphQLService;
+
+$client = new ThinkificGraphQLService(
+  "eyJrg0ZmY1O...."
+);
+
+/**
+* Fetch all users on Site
+*/
+$users = $client->users->users();
+
+foreach ($users->items() as $user) {
+
+    /**
+    * Fetch all groups for a user (via email)
+    */
+    $groups = $client->users->groups($user->email);
+
+    /**
+    * Fetch all groups for user (via GID)
+    */
+    $groups = $client->users->groups($user->gid);
+
+    /**
+    * Fetch the User by Email
+    */
+    $theUser = $client->users->getByEmail($user->email);
+}
+```
+
 ## Support, Issues & Bugs
 
 This library is unofficial and is not endorsed or supported by Thinkific.
@@ -242,6 +280,48 @@ Which returns:
 ````
 
 When creating and updating enrollments, the **productable_id** from a **Product** should be used.
+
+As a worked example of iteration, we can query the API for all products, and then determine the Course(s) associated with each Product:
+
+````php
+
+$products = $client->products->products();
+
+foreach ($products->items() as $product) {
+
+    /**
+     * Not required to if/else here but we'll use it to highlight the alternative method
+     * of retrieving the course associated with a product
+     */
+    if ($product->productable_type == "Course") {
+        
+        /**
+         * We could also query the course directly:
+         *  
+         * Note the use of 'productable_id' when querying the course end point
+         */
+        
+        //$courses = $client->courses->get($product->productable_id);
+
+        /**
+         * And here we will use the products service to retrieve the course
+         * Note the use of the Product 'ID'
+         */
+        $courses = $client->products->courses($product->id);
+        
+    } else {
+        /**
+         * Bundles
+         */
+        $courses = $client->products->courses($product->id);
+    }
+    
+    /**
+     * $courses is an array of Course objects
+     */
+}
+
+````
 
 ## Additional Features
 
