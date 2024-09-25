@@ -2,6 +2,7 @@
 
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Quizzes;
 
+use Carbon\Carbon;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Users\User;
 
 final class QuizAttempt
@@ -13,7 +14,9 @@ final class QuizAttempt
         public int  $incorrect_count,
         public int  $result_id,
         public User $user,
-        public Quiz $quiz
+        public Quiz $quiz,
+        public Carbon $created_at,
+        public Carbon $updated_at,
     )
     {
     }
