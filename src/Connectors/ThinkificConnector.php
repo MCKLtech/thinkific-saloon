@@ -124,7 +124,8 @@ class ThinkificConnector extends Connector implements HasPagination
      */
     public function paginate(Request $request): PagedPaginator
     {
-        return new class(connector: $this, request: $request) extends PagedPaginator {
+        $paginator = new class(connector: $this, request: $request) extends PagedPaginator {
+
             protected ?int $perPageLimit = 100;
 
             protected function isLastPage(Response $response): bool
@@ -132,12 +133,60 @@ class ThinkificConnector extends Connector implements HasPagination
                 return is_null($response->json('meta.pagination.next_page'));
             }
 
+            protected function getTotalPages(Response $response): int
+            {
+                return $response->json('meta.pagination.total_pages');
+            }
+
             protected function getPageItems(Response $response, Request $request): array
             {
                 return $response->dto();
             }
 
+            protected function applyPagination(Request $request): Request
+            {
+                $request->query()->add('page', $this->page);
+
+                $filters = $request->query()->all();
+
+                $this->setPerPageLimit($filters['limit'] ?? $this->perPageLimit);
+
+                if (is_numeric($this->perPageLimit)) {
+                    $request->query()->add('limit', $this->perPageLimit);
+                }
+
+                return $request;
+            }
+
         };
+
+        $filters = $request->query()->all();
+
+        $paginator->setStartPage($filters['start_page'] ?? 1);
+
+        $paginator->setPerPageLimit($filters['limit'] ?? 100);
+
+        /**
+         * @see https://github.com/saloonphp/saloon/issues/432
+         */
+        $paginator->rewind();
+
+        if (isset($filters['max_pages'])) {
+
+            /**
+             * We add on the max_pages otherwise we may already be at the 'max' page
+             */
+            $currentPage = $paginator->getCurrentPage();
+
+            $paginator->setMaxPages($currentPage + $filters['max_pages']);
+
+            /**
+             * One good rewind deserves another
+             */
+            $paginator->rewind();
+        }
+
+        return $paginator;
     }
 
 

@@ -158,6 +158,29 @@ $newUser = $client->users->create($newUser);
 
 ```
 
+## Pagination
+
+In general, the syntax for pagination is as follows:
+
+```php
+$users = $client->users->users();
+
+foreach ($users->items() as $user) {
+    // Do something with the user
+}
+```
+
+To apply filters, supply them as an array. The following example, we are asking the API to return 2 results (Users) per page of results. We will start on Page 3 of the results, and we will iterate over a maximum of 4 pages. This will return 8 (2 Users x 4 Pages) results in total. It is recommend to limit your max_pages and work in batches for large result sets, as otherwise the system will iterate over all pages until the rate limit is reached.
+    
+```php
+$users = $client->users->users(['limit' => 2, 'max_pages' => 4, 'start_page' => 3]);
+
+foreach ($users->items() as $user) {
+    // Do something with the user
+}
+```
+
+
 ## Supported Endpoints
 
 All endpoints follow a similar mechanism to the examples show above. Again, please ensure you read the Thinkific API
