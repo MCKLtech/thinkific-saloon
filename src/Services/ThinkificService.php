@@ -116,10 +116,10 @@ final class ThinkificService implements Thinkific
     /**
      * Dynamically set the Connector
      *
-     * @param ThinkificConnector $connector
+     * @param ThinkificConnector|bool $connector
      * @return void
      */
-    public function setConnector(ThinkificConnector $connector): void
+    public function setConnector(ThinkificConnector|bool $connector): void
     {
         $this->connector = $connector;
     }
@@ -127,12 +127,23 @@ final class ThinkificService implements Thinkific
     /**
      * Dynamically set the Authenticator
      *
-     * @param Authenticator $authenticator
+     * @param Authenticator|bool $authenticator
      * @return void
      */
-    public function setAuthenticator(Authenticator $authenticator): void
+    public function setAuthenticator(Authenticator|bool $authenticator): void
     {
         $this->authenticator = $authenticator;
+    }
+
+    /**
+     * Reset the Connector and Authenticator
+     *
+     * @return void
+     */
+    public function resetService(): void
+    {
+        $this->connector = false;
+        $this->authenticator = false;
     }
 
 }

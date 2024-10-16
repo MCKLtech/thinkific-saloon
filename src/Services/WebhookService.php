@@ -29,6 +29,11 @@ class WebhookService extends Resource
     {
         $this->service->is_oauth = true;
 
+        /**
+         * We need to reset the connector to force the authenticator to use a Bearer token
+         */
+        $this->service->resetService();
+
         $connector = $this->service->connector();
 
         $connector->base_url = "https://api.thinkific.com/api/v2/";
