@@ -128,6 +128,17 @@ class ThinkificConnector extends Connector implements HasPagination
 
             protected ?int $perPageLimit = 100;
 
+            /**
+             * The total number of results as indicated by the pagination meta from the API
+             * Important: You must make at least one API call before calling this e.g. count($pages)
+             *
+             * @return int
+             */
+            public function getTotalAPIResults(): int
+            {
+                return $this->currentResponse->json('meta.pagination.total_items');
+            }
+
             protected function isLastPage(Response $response): bool
             {
                 return is_null($response->json('meta.pagination.next_page'));

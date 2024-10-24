@@ -68,12 +68,12 @@ $client = new \WooNinja\ThinkificSaloon\Services\ThinkificService(
 );
 ```
 
-
 ## Client - GraphQL
 
 The library has basic support for GraphQL endpoints. Feel free to open a PR to add more, or request them via issues.
 
-Below is a theoretical example for interacting with the GraphQL API. Note carefully the ThinkificGraphQLService class and the use of an OAuth/private token. You cannot use an API Key with the GraphQL API.
+Below is a theoretical example for interacting with the GraphQL API. Note carefully the ThinkificGraphQLService class
+and the use of an OAuth/private token. You cannot use an API Key with the GraphQL API.
 
 ```php
 use WooNinja\ThinkificSaloon\GraphQL\Services\ThinkificGraphQLService;
@@ -170,8 +170,11 @@ foreach ($users->items() as $user) {
 }
 ```
 
-To apply filters, supply them as an array. The following example, we are asking the API to return 2 results (Users) per page of results. We will start on Page 3 of the results, and we will iterate over a maximum of 4 pages. This will return 8 (2 Users x 4 Pages) results in total. It is recommend to limit your max_pages and work in batches for large result sets, as otherwise the system will iterate over all pages until the rate limit is reached.
-    
+To apply filters, supply them as an array. The following example, we are asking the API to return 2 results (Users) per
+page of results. We will start on Page 3 of the results, and we will iterate over a maximum of 4 pages. This will return
+8 (2 Users x 4 Pages) results in total. It is recommend to limit your max_pages and work in batches for large result
+sets, as otherwise the system will iterate over all pages until the rate limit is reached.
+
 ```php
 $users = $client->users->users(['limit' => 2, 'max_pages' => 4, 'start_page' => 3]);
 
@@ -180,6 +183,30 @@ foreach ($users->items() as $user) {
 }
 ```
 
+To determine page counts and total returned items, you can do the following. Assume this group has 23 users in it. Therefore there will be 3 pages of results (10, 10, 3), and the total number of results will be 23. This information can be used to avoid API timeouts e.g. Adjust job timing.
+
+```php
+/**
+* Get Users in a given Thinkific Groups with a limit of 10 results per page
+ */
+$pages = $client->groups->users('1234567', ['limit' => 10]);
+
+/**
+* Get the total number of pages
+ * Important: You must call 'count' this before calling getTotalAPIResults()
+ */
+$total_pages = count($pages);
+
+/**
+* Get the total number of results i.e. The total number of users in this group.
+ */
+$total_results = $pages->getTotalAPIResults();
+
+foreach ($pages->items() as $user) {
+    //Do something with the user
+    break;
+}
+```
 
 ## Supported Endpoints
 
@@ -304,7 +331,8 @@ Which returns:
 
 When creating and updating enrollments, the **productable_id** from a **Product** should be used.
 
-As a worked example of iteration, we can query the API for all products, and then determine the Course(s) associated with each Product:
+As a worked example of iteration, we can query the API for all products, and then determine the Course(s) associated
+with each Product:
 
 ````php
 
