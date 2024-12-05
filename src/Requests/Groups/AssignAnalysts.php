@@ -2,15 +2,10 @@
 
 namespace WooNinja\ThinkificSaloon\Requests\Groups;
 
-use Carbon\Carbon;
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
-use Saloon\Http\Response;
 use Saloon\Traits\Body\HasJsonBody;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\CreateEnrollment;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
-use WooNinja\ThinkificSaloon\Traits\RequestTrait;
 
 final class AssignAnalysts extends Request implements HasBody
 {

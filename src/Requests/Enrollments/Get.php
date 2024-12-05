@@ -7,7 +7,6 @@ use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Promotions\Promotion;
 
 final class Get extends Request
 {
@@ -43,7 +42,9 @@ final class Get extends Request
             activated_at: Carbon::parse($responseData['activated_at']),
             completed_at: Carbon::parse($responseData['completed_at']),
             updated_at: Carbon::parse($responseData['updated_at']),
-            expiry_date: Carbon::parse($responseData['expiry_date'])
+            expiry_date: Carbon::parse($responseData['expiry_date']),
+            certificate_url: null,
+            certificate_expiry_date: null
         );
     }
 }

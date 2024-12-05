@@ -7,9 +7,7 @@ use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
 use Saloon\PaginationPlugin\Contracts\Paginatable;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Instructors\Instructor;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Users\User;
 
 final class Instructors extends Request implements Paginatable
 {

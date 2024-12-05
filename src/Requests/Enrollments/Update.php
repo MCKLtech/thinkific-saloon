@@ -2,13 +2,10 @@
 
 namespace WooNinja\ThinkificSaloon\Requests\Enrollments;
 
-use Carbon\Carbon;
 use Saloon\Contracts\Body\HasBody;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
-use Saloon\Http\Response;
 use Saloon\Traits\Body\HasJsonBody;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\UpdateEnrollment;
 use WooNinja\ThinkificSaloon\Traits\RequestTrait;
 

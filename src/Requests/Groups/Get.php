@@ -6,9 +6,7 @@ use Carbon\Carbon;
 use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Groups\Group;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Promotions\Promotion;
 
 final class Get extends Request
 {

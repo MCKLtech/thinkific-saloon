@@ -8,7 +8,6 @@ use Saloon\Http\Request;
 use Saloon\Http\Response;
 use Saloon\PaginationPlugin\Contracts\Paginatable;
 use WooNinja\ThinkificSaloon\DataTransferObjects\CourseReviews\Review;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
 
 final class CourseReviews extends Request implements Paginatable
 {
