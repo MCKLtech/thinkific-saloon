@@ -43,6 +43,7 @@ final class Enrollments extends Request implements Paginatable
                 completed_at: Carbon::parse($enrollment['completed_at']),
                 updated_at: Carbon::parse($enrollment['updated_at']),
                 expiry_date: Carbon::parse($enrollment['expiry_date']),
+                credential_id: null,
                 certificate_url: null,
                 certificate_expiry_date: null
             );

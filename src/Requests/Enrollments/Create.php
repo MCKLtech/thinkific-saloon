@@ -63,6 +63,7 @@ final class Create extends Request implements HasBody
             completed_at: Carbon::parse($responseData['completed_at']),
             updated_at: Carbon::parse($responseData['updated_at']),
             expiry_date: Carbon::parse($responseData['expiry_date']),
+            credential_id: null,
             certificate_url: null,
             certificate_expiry_date: null
         );
