@@ -32,12 +32,13 @@ class ProductService extends Resource
      * List Products
      * @see https://developers.thinkific.com/api/api-documentation/#/Products/getProducts
      *
+     * @param array $filters
      * @return PagedPaginator
      */
-    public function products(): PagedPaginator
+    public function products(array $filters = []): PagedPaginator
     {
         return $this->connector
-            ->paginate(new Products());
+            ->paginate(new Products($filters));
     }
 
     /**

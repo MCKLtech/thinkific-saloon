@@ -12,6 +12,12 @@ final class Courses extends Request implements Paginatable
 {
     protected Method $method = Method::GET;
 
+    public function __construct(
+        private readonly array $filters = [],
+    )
+    {
+    }
+
     public function resolveEndpoint(): string
     {
         return "courses";
@@ -42,5 +48,10 @@ final class Courses extends Request implements Paginatable
                 instructor_id: $course['instructor_id']
             );
         }, $response->json('items'));
+    }
+
+    protected function defaultQuery(): array
+    {
+        return $this->filters;
     }
 }

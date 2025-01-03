@@ -13,14 +13,14 @@ final class Get extends Request
     protected Method $method = Method::GET;
 
     public function __construct(
-        private readonly int $productable_id,
+        private readonly int $course_id,
     )
     {
     }
 
     public function resolveEndpoint(): string
     {
-        return "courses/{$this->productable_id}";
+        return "courses/{$this->course_id}";
     }
 
     public function createDtoFromResponse(Response $response): Course

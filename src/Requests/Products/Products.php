@@ -13,6 +13,12 @@ final class Products extends Request implements Paginatable
 {
     protected Method $method = Method::GET;
 
+    public function __construct(
+        private readonly array $filters = [],
+    )
+    {
+    }
+
     public function resolveEndpoint(): string
     {
         return "products";
@@ -46,5 +52,10 @@ final class Products extends Request implements Paginatable
                 product_prices: $product['product_prices']
             );
         }, $response->json('items'));
+    }
+
+    protected function defaultQuery(): array
+    {
+        return $this->filters;
     }
 }
