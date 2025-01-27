@@ -73,7 +73,9 @@ class ThinkificConnector extends Connector
     protected function resolveLimits(): array
     {
         return [
-            Limit::allow(requests: $this->rateLimit, threshold: 0.95)->everyMinute()
+            Limit::allow(requests: $this->rateLimit, threshold: 0.95)
+                ->everyMinute()
+                ->name($this->getLimiterPrefix())
         ];
     }
 
