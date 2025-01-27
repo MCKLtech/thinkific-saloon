@@ -28,6 +28,8 @@ class ThinkificConnector extends Connector implements HasPagination
 
     public string $base_url = 'https://api.thinkific.com/api/public/v1/';
 
+    public string $limiter_prefix = '';
+
     public function __construct(
         protected string $subdomain
     )
@@ -87,9 +89,33 @@ class ThinkificConnector extends Connector implements HasPagination
         $this->rateLimit = $limit;
     }
 
+    /**
+     * Return the limiter prefix name
+     *
+     * @return string
+     */
+    public function getLimiterPrefixName(): string
+    {
+        return $this->getLimiterPrefix();
+    }
+
+    /**
+     * Dynamically set the limiter prefix name
+     *
+     * @param string $prefix
+     * @return void
+     */
+    public function setLimiterPrefixName(string $prefix): void
+    {
+        $this->limiter_prefix = $prefix;
+    }
+
     protected function getLimiterPrefix(): ?string
     {
-        return "thinkific_subdomain_{$this->subdomain}";
+        if (empty($this->limiter_prefix)) {
+            return "thinkific_subdomain_{$this->subdomain}";
+        }
+        return $this->limiter_prefix;
     }
 
     /**
