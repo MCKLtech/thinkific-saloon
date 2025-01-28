@@ -63,7 +63,8 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
                     id: $choice['id'],
                     text: $choice['text']
                 ), $userAnswer['choices'])
-            ), $survey['userAnswers']['nodes'])
+            ), $survey['userAnswers']['nodes']),
+            survey_id: $survey['survey']['id']
         ), $response->json('data.site.surveySubmissions.nodes'));
     }
 
@@ -85,6 +86,9 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
         id
         user {
           email
+          id
+        }
+        survey {
           id
         }
         userAnswers(first: $userAnswersFirst2) {

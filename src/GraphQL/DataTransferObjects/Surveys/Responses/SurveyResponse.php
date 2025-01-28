@@ -14,6 +14,7 @@ final class SurveyResponse
         public ?User  $user = null,
         /** @var UserAnswer[] $choices */
         public array $userAnswers,
+        public int    $survey_id,
     )
     {
     }
