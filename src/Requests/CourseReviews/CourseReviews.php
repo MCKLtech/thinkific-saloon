@@ -51,8 +51,6 @@ final class CourseReviews extends Request implements Paginatable
             $params['approved'] = true;
         }
 
-        ray($params);
-
         return $params;
     }
 }

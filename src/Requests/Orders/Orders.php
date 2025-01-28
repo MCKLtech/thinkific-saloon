@@ -20,8 +20,6 @@ final class Orders extends Request implements Paginatable
 
     public function createDtoFromResponse(Response $response): array
     {
-        ray($response);
-
         return array_map(function (array $order) {
             return new Order(
                 id: $order['id'],
