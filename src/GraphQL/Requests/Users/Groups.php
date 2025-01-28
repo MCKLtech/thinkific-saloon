@@ -29,15 +29,21 @@ final class Groups extends Request implements HasBody
 
     public function createDtoFromResponse(Response $response): array
     {
-        $group = $response->json('data.user.groups.edges');
+        if (filter_var($this->gid_or_email, FILTER_VALIDATE_EMAIL)) {
+            $path = 'data.userByEmail.groups.nodes';
+        } else {
+            $path = 'data.user.groups.nodes';
+        }
 
-        if(empty($group)) return [];
+        $groups = $response->json($path);
+
+        if (empty($groups)) return [];
 
         return array_map(fn($group) => new Group(
-            created_at: Carbon::parse($group['node']['createdAt']),
-            id: $group['node']['id'],
-            name: $group['node']['name']
-        ), $group);
+            created_at: Carbon::parse($group['createdAt']),
+            id: $group['id'],
+            name: $group['name']
+        ), $groups);
     }
 
     protected function defaultBody(): array
@@ -55,12 +61,10 @@ final class Groups extends Request implements HasBody
     gid
     id
     groups(first: 100) {
-      edges {
-        node {
-          createdAt
-          id
-          name
-        }
+      nodes {
+        name
+        id
+        createdAt
       }
     }
   }
@@ -83,13 +87,11 @@ final class Groups extends Request implements HasBody
     gid
     id
     groups(first: 100) {
-      edges {
-        node {
+        nodes {
           createdAt
           id
           name
         }
-      }
     }
   }
 }',

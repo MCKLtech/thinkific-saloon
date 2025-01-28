@@ -14,7 +14,6 @@ use Saloon\PaginationPlugin\CursorPaginator;
 use Saloon\PaginationPlugin\Paginator;
 use Saloon\Traits\Body\HasJsonBody;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Assignments\Submission;
-use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Groups\Group;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\User;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Users\Users;
 
