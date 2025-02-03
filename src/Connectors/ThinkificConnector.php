@@ -154,7 +154,7 @@ class ThinkificConnector extends Connector implements HasPagination
     {
         $paginator = new class(connector: $this, request: $request) extends PagedPaginator {
 
-            protected ?int $perPageLimit = 100;
+            protected ?int $perPageLimit = 50;
 
             /**
              * The total number of results as indicated by the pagination meta from the API
@@ -165,6 +165,17 @@ class ThinkificConnector extends Connector implements HasPagination
             public function getTotalAPIResults(): int
             {
                 return $this->currentResponse->json('meta.pagination.total_items');
+            }
+
+            /**
+             * The total number of pages as indicated by the pagination meta from the API
+             * Important: You must make at least one API call before calling this e.g. count($pages)
+             *
+             * @return int
+             */
+            public function getTotalAPIPages(): int
+            {
+                return $this->currentResponse->json('meta.pagination.total_pages');
             }
 
             protected function isLastPage(Response $response): bool

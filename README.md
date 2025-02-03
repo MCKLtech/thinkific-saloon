@@ -187,24 +187,41 @@ To determine page counts and total returned items, you can do the following. Ass
 
 ```php
 /**
-* Get Users in a given Thinkific Groups with a limit of 10 results per page
+ * Set a filter to return 50 users, starting from page one, and only one page of results.
+ * We only retrieve one page of results as if we don't set a limit, the system will iterate over all pages until the rate limit is reached.
  */
-$pages = $client->groups->users('1234567', ['limit' => 10]);
+$filter = ["limit" => 50, "max_pages" => 1, "start_page" => 1];
 
 /**
-* Get the total number of pages
- * Important: You must call 'count' this before calling getTotalAPIResults()
+ * Set up the API Call
  */
-$total_pages = count($pages);
+$users = $client->users->users($filter);
 
 /**
-* Get the total number of results i.e. The total number of users in this group.
+ * Make one API call so we can get the pagination data
  */
-$total_results = $pages->getTotalAPIResults();
+$firstAPICall = count($users);
 
-foreach ($pages->items() as $user) {
-    //Do something with the user
-    break;
+/**
+ * Get the total number of users in the system
+ */
+$total_results = $users->getTotalAPIResults();
+
+/**
+ * Get the total number of pages of users in the system (based on the initial filter)
+ */
+$total_pages = $users->getTotalAPIPages();
+
+/**
+* Iterate over the remaining pages (Useful for syncing large data sets via queued jobs etc)
+*/
+for($startPage = 2; $startPage <= $total_pages; $startPage++) {
+    $filter['start_page'] = $startPage;
+    $users = $client->users->users($filter);
+
+    foreach($users->items() as $user) {
+        // Do something with the users    
+    }
 }
 ```
 
