@@ -19,6 +19,8 @@ final class ThinkificGraphQLService implements Thinkific
 
     public GroupService $groups;
 
+    public CourseService $courses;
+
     public AssignmentService $assignments;
 
     public SurveyService $surveys;
@@ -30,6 +32,8 @@ final class ThinkificGraphQLService implements Thinkific
         $this->users = new UserService($this);
 
         $this->groups = new GroupService($this);
+
+        $this->courses = new CourseService($this);
 
         $this->assignments = new AssignmentService($this);
 
