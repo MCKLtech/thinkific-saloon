@@ -13,6 +13,7 @@ use Saloon\PaginationPlugin\CursorPaginator;
 use Saloon\PaginationPlugin\Paginator;
 use Saloon\Traits\Body\HasJsonBody;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Courses\Chapter;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Courses\Content;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Courses\Lesson;
 
 final class Course extends Request implements HasBody, HasRequestPagination, Paginatable
@@ -25,7 +26,8 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
 
     public function __construct(
         private readonly int $course_id,
-        private readonly int $limit = 50,
+        private readonly int $chapters_per_page,
+        private readonly int $lessons_per_page,
     )
     {
     }
@@ -45,7 +47,11 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
                 id: $lesson['id'],
                 lessonType: $lesson['lessonType'],
                 title: $lesson['title'],
-                takeUrl: $lesson['takeUrl']
+                takeUrl: $lesson['takeUrl'],
+                content: new Content(
+                    id: $lesson['content']['id'],
+                    contentType: $lesson['content']['contentType']
+                )
             ), $chapter['lessons']['nodes'])
         ), $response->json('data.course.curriculum.chapters.nodes'));
     }
@@ -69,8 +75,18 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
               lessonType
               title
               takeUrl
+              content {
+                contentType
+                id
+              }
             }
           }
+        }
+        pageInfo {
+          endCursor
+          hasNextPage
+          hasPreviousPage
+          startCursor
         }
       }
     }
@@ -79,9 +95,9 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
 ',
             'variables' => [
                 'courseId' => $this->course_id,
-                'first' => $this->limit,
+                'first' => $this->chapters_per_page,
                 'after' => $this->after,
-                'lessonsFirst' => $this->limit,
+                'lessonsFirst' => $this->lessons_per_page,
                 'lessonsAfter' => null
             ]
         ];
