@@ -87,6 +87,8 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
         user {
           email
           id
+          firstName
+          lastName
         }
         survey {
           id
