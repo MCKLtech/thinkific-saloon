@@ -11,10 +11,10 @@ final class SurveyResponse
         public int    $id,
         public Carbon $created_at,
         public Carbon $completed_at,
-        public ?User  $user = null,
         /** @var UserAnswer[] $choices */
-        public array $userAnswers,
+        public array  $userAnswers,
         public int    $survey_id,
+        public ?User  $user = null,
     )
     {
     }

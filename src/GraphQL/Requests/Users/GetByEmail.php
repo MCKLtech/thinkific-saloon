@@ -32,10 +32,10 @@ final class GetByEmail extends Request implements HasBody
 
         return new User(
             id: $user['id'],
+            email: $user['email'],
             gid: $user['gid'],
             first_name: $user['firstName'],
             last_name: $user['lastName'],
-            email: $user['email'],
             has_admin_role: $user['hasAdminRole'],
             custom_profile_fields: $user['customProfileFields'],
         );

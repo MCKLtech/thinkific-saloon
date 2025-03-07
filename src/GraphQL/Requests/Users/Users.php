@@ -38,10 +38,10 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
     {
         return array_map(fn($user) => new User(
             id: $user['node']['id'],
+            email: $user['node']['email'],
             gid: $user['node']['gid'],
             first_name: $user['node']['firstName'],
             last_name: $user['node']['lastName'],
-            email: $user['node']['email'],
             has_admin_role: $user['node']['hasAdminRole'] ?? null,
             custom_profile_fields: $user['node']['customProfileFields'] ?? null,
         ), $response->json('data.site.users.edges'));

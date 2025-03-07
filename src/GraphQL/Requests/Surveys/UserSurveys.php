@@ -46,13 +46,6 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
             id: $survey['id'],
             created_at: Carbon::parse($survey['createdAt']),
             completed_at: Carbon::parse($survey['completedAt']),
-            user: new User(
-                id: $survey['user']['id'],
-                gid: $survey['user']['gid'] ?? null,
-                first_name: $survey['user']['firstName'] ?? null,
-                last_name: $survey['user']['lastName'] ?? null,
-                email: $survey['user']['email']
-            ),
             userAnswers: array_map(fn($userAnswer) => new UserAnswer(
                 textResponse: $userAnswer['textResponse'],
                 question: new Question(
@@ -64,7 +57,14 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
                     text: $choice['text']
                 ), $userAnswer['choices'])
             ), $survey['userAnswers']['nodes']),
-            survey_id: $survey['survey']['id']
+            survey_id: $survey['survey']['id'],
+            user: new User(
+                id: $survey['user']['id'],
+                email: $survey['user']['email'],
+                gid: $survey['user']['gid'] ?? null,
+                first_name: $survey['user']['firstName'] ?? null,
+                last_name: $survey['user']['lastName'] ?? null
+            ),
         ), $response->json('data.site.surveySubmissions.nodes'));
     }
 

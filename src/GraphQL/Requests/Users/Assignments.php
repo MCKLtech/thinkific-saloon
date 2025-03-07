@@ -43,10 +43,10 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
 
         $user = new User(
             id: $assignmentUser['id'],
+            email: $assignmentUser['email'],
             gid: $assignmentUser['gid'],
             first_name: $assignmentUser['firstName'],
             last_name: $assignmentUser['lastName'],
-            email: $assignmentUser['email'],
             has_admin_role: $assignmentUser['hasAdminRole'] ?? null,
             custom_profile_fields: $assignmentUser['customProfileFields'] ?? null,
         );

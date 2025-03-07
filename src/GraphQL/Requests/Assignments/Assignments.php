@@ -53,10 +53,10 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
             created_at: Carbon::parse($submission['node']['createdAt']),
             user: new User(
                 id: $submission['node']['user']['id'],
+                email: $submission['node']['user']['email'],
                 gid: $submission['node']['user']['gid'],
                 first_name: $submission['node']['user']['firstName'],
                 last_name: $submission['node']['user']['lastName'],
-                email: $submission['node']['user']['email'],
                 has_admin_role: $submission['node']['user']['hasAdminRole'] ?? null,
                 custom_profile_fields: $submission['node']['user']['customProfileFields'] ?? null,
             )
