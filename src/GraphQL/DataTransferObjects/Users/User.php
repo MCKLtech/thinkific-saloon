@@ -14,4 +14,10 @@ final class User
         public ?array $custom_profile_fields = null,
     ) {
     }
+    public function getFullName(): string
+    {
+        $fullName = trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
+
+        return !empty($fullName) ? $fullName : $this->email;
+    }
 }

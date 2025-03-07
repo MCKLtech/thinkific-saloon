@@ -26,4 +26,11 @@ final class User
     {
     }
 
+    public function getFullName(): string
+    {
+        $fullName = trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
+
+        return !empty($fullName) ? $fullName : $this->email;
+    }
+
 }
