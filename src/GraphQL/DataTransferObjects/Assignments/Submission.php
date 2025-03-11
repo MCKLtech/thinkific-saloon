@@ -8,19 +8,21 @@ use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\User;
 final class Submission
 {
     public function __construct(
-        public int    $id,
-        public string $status,
-        public string $name,
-        public string $type,
-        public string $url,
-        public int    $chapter_id,
-        public string $chapter_name,
-        public int    $product_id,
-        public string $product_name,
+        public int     $id,
+        public string  $status,
+        public string  $name,
+        public string  $type,
+        public string  $url,
+        public int     $lesson_id,
+        public string  $lesson_name,
+        public int     $chapter_id,
+        public string  $chapter_name,
+        public int     $product_id,
+        public string  $product_name,
         public ?Carbon $reviewed_at,
-        public Carbon $updated_at,
-        public Carbon $created_at,
-        public ?User  $user = null,
+        public Carbon  $updated_at,
+        public Carbon  $created_at,
+        public ?User   $user = null,
     )
     {
     }

@@ -26,7 +26,8 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
     public ?string $after = null;
 
     public function __construct(
-        private readonly int $per_page = 100
+        private readonly int  $per_page = 50,
+        private readonly ?int $user_id = null,
     )
     {
     }
@@ -44,6 +45,8 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
             name: $submission['node']['file']['name'],
             type: $submission['node']['file']['type'],
             url: $submission['node']['file']['url'],
+            lesson_id: $submission['node']['assignment']['lesson']['id'],
+            lesson_name: $submission['node']['assignment']['lesson']['title'],
             chapter_id: $submission['node']['assignment']['lesson']['chapter']['id'],
             chapter_name: $submission['node']['assignment']['lesson']['chapter']['title'],
             product_id: $submission['node']['assignment']['lesson']['course']['product']['id'],
@@ -65,10 +68,22 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
 
     protected function defaultBody(): array
     {
+        $variables = [
+            'first' => $this->per_page,
+            'after' => $this->after,
+            'filter' => null
+        ];
+
+        if (is_numeric($this->user_id)) {
+            $variables['filter'] = [
+                'userIds' => (string)$this->user_id // Ensure it's a string as per the expected JSON output
+            ];
+        }
+
         return [
-            'query' => 'query StudentsAssignmentSubmissions($first: Int, $after: String) {
+            'query' => 'query StudentsAssignmentSubmissions($first: Int, $after: String, $filter: AssignmentSubmissionFilter) {
   site {
-    assignmentSubmissions(first: $first, after: $after) {
+    assignmentSubmissions(first: $first, after: $after, filter: $filter) {
       pageInfo {
         endCursor
         hasNextPage
@@ -96,6 +111,8 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
           createdAt
           assignment {
             lesson {
+              id
+              title
               chapter {
                 id
                 title
@@ -113,10 +130,7 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
     }
   }
 }',
-            'variables' => [
-                'first' => $this->per_page,
-                'after' => $this->after
-            ]
+            'variables' => $variables
         ];
     }
 
