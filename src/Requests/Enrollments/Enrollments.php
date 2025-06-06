@@ -38,14 +38,14 @@ final class Enrollments extends Request implements Paginatable
                 expired: $enrollment['expired'],
                 is_free_trial: $enrollment['is_free_trial'],
                 completed: $enrollment['completed'],
-                started_at: Carbon::parse($enrollment['started_at']),
-                activated_at: Carbon::parse($enrollment['activated_at']),
-                completed_at: Carbon::parse($enrollment['completed_at']),
-                updated_at: Carbon::parse($enrollment['updated_at']),
-                expiry_date: Carbon::parse($enrollment['expiry_date']),
-                credential_id: null,
-                certificate_url: null,
-                certificate_expiry_date: null
+                started_at: !empty($enrollment['started_at']) ? Carbon::parse($enrollment['started_at']) : null,
+                activated_at: !empty($enrollment['activated_at']) ? Carbon::parse($enrollment['activated_at']) : null,
+                completed_at: !empty($enrollment['completed_at']) ? Carbon::parse($enrollment['completed_at']) : null,
+                updated_at: !empty($enrollment['updated_at']) ? Carbon::parse($enrollment['updated_at']) : null,
+                expiry_date: !empty($enrollment['expiry_date']) ? Carbon::parse($enrollment['expiry_date']) : null,
+                credential_id: $enrollment['credential_id'] ?? null,
+                certificate_url: $enrollment['certificate_url'] ?? null,
+                certificate_expiry_date: !empty($enrollment['certificate_expiry_date']) ? Carbon::parse($enrollment['certificate_expiry_date']) : null
             );
         }, $response->json('items'));
     }
