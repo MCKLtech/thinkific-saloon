@@ -6,6 +6,7 @@ use JsonException;
 use Saloon\Http\Response;
 use Saloon\RateLimitPlugin\Exceptions\LimitException;
 use Saloon\RateLimitPlugin\Exceptions\RateLimitReachedException;
+use WooNinja\ThinkificSaloon\GraphQL\Connectors\ThinkificConnector;
 
 class ThinkificGraphQLResponse extends Response
 {
@@ -16,12 +17,15 @@ class ThinkificGraphQLResponse extends Response
      */
     public function json(string|int|null $key = null, mixed $default = null): mixed
     {
-        $data = parent::json($key, $default);
+        /**
+         * Check the response for rate limit errors
+         */
+        $checkData = parent::json();
 
-        if ($this->isRateLimitError($data)) {
+        if ($this->isRateLimitError($checkData)) {
 
             /**
-             * @var \WooNinja\ThinkificSaloon\GraphQL\Connectors\ThinkificConnector $connector
+             * @var ThinkificConnector $connector
              */
             $connector = $this->getConnector();
             $limit = $connector?->getLimits() ?? null;
@@ -30,12 +34,14 @@ class ThinkificGraphQLResponse extends Response
 
                 $limit = $limit[0];
 
+                $limit->setExpiryTimestamp(time() + 60); // Set expiry to 60 seconds from now
+
                 throw new RateLimitReachedException($limit);
             }
 
         }
 
-        return $data;
+        return parent::json($key, $default);
     }
 
     protected function isRateLimitError(array $data): bool
