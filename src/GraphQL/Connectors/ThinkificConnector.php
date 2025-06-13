@@ -12,6 +12,7 @@ use Saloon\RateLimitPlugin\Stores\MemoryStore;
 use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 use Saloon\Traits\Plugins\AcceptsJson;
 use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
+use WooNinja\ThinkificSaloon\GraphQL\Responses\ThinkificGraphQLResponse;
 
 class ThinkificConnector extends Connector
 {
@@ -23,12 +24,15 @@ class ThinkificConnector extends Connector
 
     public bool|RateLimitStore $rateStore = false;
 
+    protected ?string $response = ThinkificGraphQLResponse::class;
+
     /**
      * Thinkific Rate Limit (Point Value Complexity)
      *
      * @var int
      */
     public int $rateLimit = 10000;
+
 
     public function resolveBaseUrl(): string
     {

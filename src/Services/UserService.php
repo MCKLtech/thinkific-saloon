@@ -112,19 +112,21 @@ class UserService extends Resource
      * @param string $email
      * @return User|null
      */
-    public function findByEmail(string $email): User|null
+    public function findByEmail(string $email): ?User
     {
-        $users = $this->users(
-            [
-                'query[email]' => $email,
-                'limit' => 1
-            ]
-        )->collect();
+        $response = $this->connector->send(new Users([
+            'query[email]' => $email,
+            'limit' => 1,
+        ]));
 
-        if ($users->count() > 0) {
-            return $users->first();
+        $users = $response->dto();
+
+        if (!empty($users) && count($users) > 0) {
+
+            return $users[0] ?? null;
         }
 
         return null;
+
     }
 }
