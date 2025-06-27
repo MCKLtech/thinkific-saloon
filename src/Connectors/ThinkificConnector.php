@@ -126,7 +126,7 @@ class ThinkificConnector extends Connector implements HasPagination
     protected function resolveLimits(): array
     {
         return [
-            Limit::allow(requests: $this->rateLimit, threshold: 0.95)
+            Limit::allow(requests: $this->rateLimit, threshold: 0.99)
                 ->everyMinute()
                 ->name($this->getLimiterPrefix())
         ];
