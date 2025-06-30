@@ -20,15 +20,19 @@ final class ThinkificGraphQLService implements Thinkific
     public GroupService $groups;
 
     public CourseService $courses;
-
     public AssignmentService $assignments;
-
     public SurveyService $surveys;
 
     public function __construct(string $token)
     {
         $this->token = $token;
 
+        $this->boot();
+
+    }
+
+    public function boot(): void
+    {
         $this->users = new UserService($this);
 
         $this->groups = new GroupService($this);

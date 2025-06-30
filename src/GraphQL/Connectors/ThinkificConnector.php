@@ -3,6 +3,8 @@
 
 namespace WooNinja\ThinkificSaloon\GraphQL\Connectors;
 
+use Saloon\Config;
+use Saloon\Contracts\Sender;
 use Saloon\Http\Connector;
 use Saloon\Http\Response;
 use Saloon\RateLimitPlugin\Contracts\RateLimitStore;
@@ -13,12 +15,15 @@ use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 use Saloon\Traits\Plugins\AcceptsJson;
 use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
 use WooNinja\ThinkificSaloon\GraphQL\Responses\ThinkificGraphQLResponse;
+use WooNinja\ThinkificSaloon\Senders\ProxySender;
+use WooNinja\ThinkificSaloon\Traits\HasProxies;
 
 class ThinkificConnector extends Connector
 {
     use AcceptsJson;
     use AlwaysThrowOnErrors;
     use HasRateLimits;
+    use HasProxies;
 
     public string $base_url = 'https://api.thinkific.com/stable/graphql';
 
@@ -37,6 +42,15 @@ class ThinkificConnector extends Connector
     public function resolveBaseUrl(): string
     {
         return $this->base_url;
+    }
+
+    protected function defaultSender(): ProxySender|Sender
+    {
+        if ($this->isUsingProxy()) {
+            return new ProxySender($this->getProxyUrl(), true);
+        }
+
+        return Config::getDefaultSender();
     }
 
     protected function defaultHeaders(): array
@@ -69,7 +83,7 @@ class ThinkificConnector extends Connector
 
     /**
      * Rate limit for Thinkific.
-     * This is a work around as Thinkific using point value, thus it is not based on time
+     * This is a workaround as Thinkific using point value, thus it is not based on time
      * @see https://support.thinkific.dev/hc/en-us/articles/22113098742935-GraphQL-Query-Limitations#h_01HS26E3HHVSZVG5Z2EZMKQHCM
      *
      * @return array

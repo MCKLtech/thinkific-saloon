@@ -15,12 +15,17 @@ use Saloon\RateLimitPlugin\Stores\MemoryStore;
 use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 use Saloon\Traits\Plugins\AcceptsJson;
 use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
+use WooNinja\ThinkificSaloon\Senders\ProxySender;
+use Saloon\Contracts\Sender;
+use Saloon\Config;
+use WooNinja\ThinkificSaloon\Traits\HasProxies;
 
 class ThinkificConnector extends Connector implements HasPagination
 {
     use AcceptsJson;
     use AlwaysThrowOnErrors;
     use HasRateLimits;
+    use HasProxies;
 
     public bool|RateLimitStore $rateStore = false;
 
@@ -40,6 +45,15 @@ class ThinkificConnector extends Connector implements HasPagination
     public function resolveBaseUrl(): string
     {
         return $this->base_url;
+    }
+
+    protected function defaultSender(): ProxySender|Sender
+    {
+        if ($this->isUsingProxy()) {
+            return new ProxySender($this->getProxyUrl(), true);
+        }
+
+        return Config::getDefaultSender();
     }
 
     protected function defaultHeaders(): array

@@ -6,13 +6,11 @@ use Saloon\Contracts\Authenticator;
 use WooNinja\ThinkificSaloon\Auth\ThinkificAuthenticator;
 use WooNinja\ThinkificSaloon\Connectors\ThinkificConnector;
 use WooNinja\ThinkificSaloon\Interfaces\Thinkific;
-use WooNinja\ThinkificSaloon\Requests\CustomProfileFieldDefinitions\CustomProfileFieldDefinition;
 use WooNinja\ThinkificSaloon\Traits\MapperTrait;
 
 final class ThinkificService implements Thinkific
 {
     use MapperTrait;
-
     private string $api_key;
     public string $subdomain;
     public bool $is_oauth;
@@ -26,6 +24,7 @@ final class ThinkificService implements Thinkific
     public ContentService $contents;
 
     public CouponService $coupons;
+
     public CourseService $courses;
     public CourseReviewService $course_reviews;
     public CustomProfileFieldDefinitionService $custom_profile_field_definitions;
@@ -50,9 +49,7 @@ final class ThinkificService implements Thinkific
 
     public WebhookService $webhooks;
     public OAuthService $oauth;
-
     private ThinkificConnector|bool $connector = false;
-
     private Authenticator|bool $authenticator = false;
 
     public function __construct(string $api_key, string $subdomain, bool $is_oauth = false)
@@ -61,6 +58,11 @@ final class ThinkificService implements Thinkific
         $this->subdomain = $subdomain;
         $this->is_oauth = $is_oauth;
 
+        $this->boot();
+    }
+
+    public function boot(): void
+    {
         $this->bundles = new BundleService($this);
         $this->chapters = new ChapterService($this);
         $this->contents = new ContentService($this);
@@ -78,6 +80,7 @@ final class ThinkificService implements Thinkific
         $this->users = new UserService($this);
         $this->webhooks = new WebhookService($this);
         $this->oauth = new OAuthService($this);
+
     }
 
     /**
