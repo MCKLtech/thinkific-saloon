@@ -168,6 +168,8 @@ class ThinkificConnector extends Connector implements HasPagination
     {
         $paginator = new class(connector: $this, request: $request) extends PagedPaginator {
 
+            private int $pageItemsKey;
+            private array $pageItems;
             protected ?int $perPageLimit = 50;
 
             /**
@@ -204,7 +206,19 @@ class ThinkificConnector extends Connector implements HasPagination
 
             protected function getPageItems(Response $response, Request $request): array
             {
-                return $response->dto();
+                /**
+                 * This is a workaround to avoid a double API call when using the paginator.
+                 * @see https://github.com/saloonphp/saloon/discussions/449
+                 */
+                $cacheKey = spl_object_id($response);
+
+                if (isset($this->pageItemsKey) && $this->pageItemsKey === $cacheKey) {
+                    return $this->pageItems;
+                }
+
+                $this->pageItemsKey = $cacheKey;
+                $this->pageItems = $response->dtoOrFail();
+                return $this->pageItems;
             }
 
             protected function applyPagination(Request $request): Request
