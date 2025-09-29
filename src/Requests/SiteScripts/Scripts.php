@@ -22,7 +22,8 @@ final class Scripts extends Request implements Paginatable
         return array_map(function (array $script) {
             return new SiteScript(
                 id: $script['id'],
-                content: $script['content'],
+                content: $script['content'] ?? null,
+                src: $script['src'] ?? null,
                 name: $script['name'],
                 description: $script['description'],
                 page_scopes: $script['page_scopes'],
