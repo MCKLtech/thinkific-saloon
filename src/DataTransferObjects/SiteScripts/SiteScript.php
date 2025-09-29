@@ -6,7 +6,8 @@ class SiteScript
 {
     public function __construct(
         public string $id,
-        public string $content,
+        public ?string $content = null,
+        public ?string $src = null,
         public string $name,
         public string $description,
         public array  $page_scopes,

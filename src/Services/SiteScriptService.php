@@ -75,7 +75,7 @@ class SiteScriptService extends Resource
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function delete(int $script_id): Response
+    public function delete(string $script_id): Response
     {
         return $this->connector
             ->send(new Delete($script_id));

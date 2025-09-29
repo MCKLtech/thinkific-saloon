@@ -10,7 +10,7 @@ final class Delete extends Request
     protected Method $method = Method::DELETE;
 
     public function __construct(
-        private readonly int $script_id,
+        private readonly string $script_id,
     )
     {
 

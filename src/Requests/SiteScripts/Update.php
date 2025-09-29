@@ -8,7 +8,6 @@ use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
 use Saloon\Traits\Body\HasJsonBody;
-use WooNinja\ThinkificSaloon\DataTransferObjects\SiteScripts\CreateSiteScript;
 use WooNinja\ThinkificSaloon\DataTransferObjects\SiteScripts\SiteScript;
 use WooNinja\ThinkificSaloon\DataTransferObjects\SiteScripts\UpdateSiteScript;
 use WooNinja\ThinkificSaloon\Traits\RequestTrait;
@@ -35,6 +34,7 @@ final class Update extends Request implements HasBody
     {
         $body = [
             'content' => $this->updateScript->content,
+            'src' => $this->updateScript->src,
             'name' => $this->updateScript->name,
             'description' => $this->updateScript->description,
             'page_scopes' => $this->updateScript->page_scopes,
@@ -53,7 +53,8 @@ final class Update extends Request implements HasBody
 
         return new SiteScript(
             id: $script['id'],
-            content: $script['content'],
+            content: $script['content'] ?? null,
+            src: $script['src'] ?? null,
             name: $script['name'],
             description: $script['description'],
             page_scopes: $script['page_scopes'],

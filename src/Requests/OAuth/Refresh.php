@@ -48,12 +48,14 @@ class Refresh extends SoloRequest implements HasBody
     {
         $token = $response->json();
 
+        $timeStamp = time() + ($token['expires_in'] ?? 82800);
+
         return new Token(
             access_token: $token['access_token'],
             refresh_token: $token['refresh_token'],
             token_type: $token['token_type'],
             gid: $token['gid'],
-            expires_at: Carbon::now()->addSeconds($token['expires_in'])
+            expires_at: Carbon::createFromTimestamp($timeStamp)
         );
 
     }

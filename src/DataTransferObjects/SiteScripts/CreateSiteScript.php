@@ -8,11 +8,11 @@ class CreateSiteScript
         public string  $name,
         public string  $description,
         public array   $page_scopes,
-        public ?string $src,
-        public ?string $content,
-        public ?string $location,
-        public ?string $load_method,
-        public ?string $category,
+        public ?string $src = null,
+        public ?string $content = null,
+        public ?string $location = 'footer',
+        public ?string $load_method = 'default',
+        public ?string $category = 'functional',
     )
     {
     }

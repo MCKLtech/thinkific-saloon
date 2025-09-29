@@ -34,6 +34,7 @@ final class Create extends Request implements HasBody
     {
         $body = [
             'content' => $this->createScript->content,
+            'src' => $this->createScript->src,
             'name' => $this->createScript->name,
             'description' => $this->createScript->description,
             'page_scopes' => $this->createScript->page_scopes,
@@ -48,11 +49,12 @@ final class Create extends Request implements HasBody
 
     public function createDtoFromResponse(Response $response): SiteScript
     {
-        $script = $response->json();
+        $script = $response->json('site_script');
 
         return new SiteScript(
             id: $script['id'],
-            content: $script['content'],
+            content: $script['content'] ?? null,
+            src: $script['src'] ?? null,
             name: $script['name'],
             description: $script['description'],
             page_scopes: $script['page_scopes'],

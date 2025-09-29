@@ -30,7 +30,8 @@ final class Get extends Request
 
         return new SiteScript(
             id: $script['id'],
-            content: $script['content'],
+            content: $script['content'] ?? null,
+            src: $script['src'] ?? null,
             name: $script['name'],
             description: $script['description'],
             page_scopes: $script['page_scopes'],

@@ -15,6 +15,7 @@ use Saloon\RateLimitPlugin\Stores\MemoryStore;
 use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 use Saloon\Traits\Plugins\AcceptsJson;
 use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
+use Saloon\Traits\Plugins\HasTimeout;
 use WooNinja\ThinkificSaloon\Senders\ProxySender;
 use Saloon\Contracts\Sender;
 use Saloon\Config;
