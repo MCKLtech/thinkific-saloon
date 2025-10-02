@@ -53,14 +53,14 @@ final class Create extends Request implements HasBody
 
         return new SiteScript(
             id: $script['id'],
-            content: $script['content'] ?? null,
-            src: $script['src'] ?? null,
             name: $script['name'],
             description: $script['description'],
             page_scopes: $script['page_scopes'],
             location: $script['location'],
             load_method: $script['load_method'],
-            category: $script['category']
+            category: $script['category'],
+            content: $script['content'] ?? null,
+            src: $script['src'] ?? null,
         );
     }
 
