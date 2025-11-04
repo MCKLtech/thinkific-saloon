@@ -2,7 +2,9 @@
 
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Bundles;
 
-final class Bundle
+use WooNinja\LMSContracts\Contracts\DTOs\Bundles\BundleInterface;
+
+final class Bundle implements BundleInterface
 {
 
     /**

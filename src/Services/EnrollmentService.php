@@ -7,6 +7,12 @@ use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
 use Saloon\Http\Response;
 use Saloon\PaginationPlugin\PagedPaginator;
+use WooNinja\LMSContracts\Contracts\DTOs\Enrollments\DeleteEnrollmentInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Enrollments\ReadEnrollmentInterface;
+use WooNinja\LMSContracts\Contracts\Services\EnrollmentServiceInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Enrollments\EnrollmentInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Enrollments\CreateEnrollmentInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Enrollments\UpdateEnrollmentInterface;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\CreateEnrollment;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\UpdateEnrollment;
@@ -15,22 +21,22 @@ use WooNinja\ThinkificSaloon\Requests\Enrollments\Enrollments;
 use WooNinja\ThinkificSaloon\Requests\Enrollments\Get;
 use WooNinja\ThinkificSaloon\Requests\Enrollments\Update;
 
-class EnrollmentService extends Resource
+class EnrollmentService extends Resource implements EnrollmentServiceInterface
 {
 
     /**
      * Get an Enrollment by ID
      * @see https://developers.thinkific.com/api/api-documentation/#/Enrollments/getEnrollmentsByID
      *
-     * @param int $enrollment_id
-     * @return Enrollment
+     * @param ReadEnrollmentInterface $enrollment_id
+     * @return EnrollmentInterface
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function get(int $enrollment_id): Enrollment
+    public function get(ReadEnrollmentInterface $enrollment_id): EnrollmentInterface
     {
         return $this->connector
-            ->send(new Get($enrollment_id))
+            ->send(new Get($enrollment_id->enrollment_id))
             ->dtoOrFail();
     }
 
@@ -51,12 +57,12 @@ class EnrollmentService extends Resource
      * Create an Enrollment
      * @https://developers.thinkific.com/api/api-documentation/#/Enrollments/createEnrollment
      *
-     * @param CreateEnrollment $enrollment
-     * @return Enrollment
+     * @param CreateEnrollmentInterface $enrollment
+     * @return EnrollmentInterface
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function create(CreateEnrollment $enrollment): Enrollment
+    public function create(CreateEnrollmentInterface $enrollment): EnrollmentInterface
     {
         return $this->connector
             ->send(new Create($enrollment))
@@ -67,12 +73,12 @@ class EnrollmentService extends Resource
      * Update an Enrollment
      * @see https://developers.thinkific.com/api/api-documentation/#/Enrollments/updateEnrollment
      *
-     * @param UpdateEnrollment $enrollment
+     * @param UpdateEnrollmentInterface $enrollment
      * @return Response
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function update(UpdateEnrollment $enrollment): Response
+    public function update(UpdateEnrollmentInterface $enrollment): Response
     {
         return $this->connector
             ->send(new Update($enrollment));
@@ -81,15 +87,15 @@ class EnrollmentService extends Resource
     /**
      * Expire an Enrollment
      *
-     * @param int $enrollment_id
+     * @param DeleteEnrollmentInterface $enrollment_id
      * @return Response
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function expire(int $enrollment_id): Response
+    public function expire(DeleteEnrollmentInterface $enrollment_id): Response
     {
         $enrollment = new UpdateEnrollment(
-            enrollment_id: $enrollment_id,
+            enrollment_id: $enrollment_id->enrollment_id,
             activated_at: null,
             expiry_date: Carbon::now()
         );

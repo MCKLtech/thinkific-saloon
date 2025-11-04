@@ -3,8 +3,9 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Promotions;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Promotions\PromotionInterface;
 
-final class Promotion
+final class Promotion implements PromotionInterface
 {
     public function __construct(
         public int    $id,

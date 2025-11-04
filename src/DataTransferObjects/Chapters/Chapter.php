@@ -2,7 +2,9 @@
 
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Chapters;
 
-final class Chapter
+use WooNinja\LMSContracts\Contracts\DTOs\Chapters\ChapterInterface;
+
+final class Chapter implements ChapterInterface
 {
     public function __construct(
         public int $id,

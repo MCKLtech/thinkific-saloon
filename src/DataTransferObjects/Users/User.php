@@ -2,7 +2,9 @@
 
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Users;
 
-final class User
+use WooNinja\LMSContracts\Contracts\DTOs\Users\UserInterface;
+
+final class User implements UserInterface
 {
 
     public function __construct(

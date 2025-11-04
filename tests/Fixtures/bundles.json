@@ -1,0 +1,34 @@
+{
+  "single_bundle": {
+    "id": 1,
+    "name": "A Bundle",
+    "description": "The Bundle description",
+    "tagline": "Bundle tagline",
+    "banner_image_url": "http://example.com/image.jpg",
+    "course_ids": [0],
+    "bundle_card_image_url": "http://example.com/image.jpg"
+  },
+  "bundle_list": {
+    "items": [
+      {
+        "id": 1,
+        "name": "A Bundle",
+        "description": "The Bundle description",
+        "tagline": "Bundle tagline",
+        "banner_image_url": "http://example.com/image.jpg",
+        "course_ids": [0],
+        "bundle_card_image_url": "http://example.com/image.jpg"
+      }
+    ],
+    "meta": {
+      "pagination": {
+        "current_page": 1,
+        "next_page": 2,
+        "prev_page": 0,
+        "total_pages": 10,
+        "total_items": 250,
+        "entries_info": "1-10 of 10"
+      }
+    }
+  }
+}

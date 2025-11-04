@@ -6,6 +6,10 @@ use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
 use Saloon\Http\Response;
 use Saloon\PaginationPlugin\PagedPaginator;
+use WooNinja\LMSContracts\Contracts\Services\UserServiceInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Users\UserInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Users\CreateUserInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Users\UpdateUserInterface;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Users\CreateUser;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Users\UpdateUser;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Users\User;
@@ -15,7 +19,7 @@ use WooNinja\ThinkificSaloon\Requests\Users\Get;
 use WooNinja\ThinkificSaloon\Requests\Users\Update;
 use WooNinja\ThinkificSaloon\Requests\Users\Users;
 
-class UserService extends Resource
+class UserService extends Resource implements UserServiceInterface
 {
 
     /**
@@ -23,11 +27,11 @@ class UserService extends Resource
      * @see https://developers.thinkific.com/api/api-documentation/#/Users/getUserByID
      *
      * @param int $user_id
-     * @return User
+     * @return UserInterface
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function get(int $user_id): User
+    public function get(int $user_id): UserInterface
     {
         return $this->connector
             ->send(new Get($user_id))
@@ -51,12 +55,12 @@ class UserService extends Resource
      * Create a User
      * @see https://developers.thinkific.com/api/api-documentation/#/Users/createUser
      *
-     * @param CreateUser $user
-     * @return User
+     * @param CreateUserInterface $user
+     * @return UserInterface
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function create(CreateUser $user): User
+    public function create(CreateUserInterface $user): UserInterface
     {
         return $this->connector
             ->send(new Create($user))
@@ -66,12 +70,12 @@ class UserService extends Resource
     /**
      * Update a User
      *
-     * @param UpdateUser $user
+     * @param UpdateUserInterface $user
      * @return Response
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function update(UpdateUser $user): Response
+    public function update(UpdateUserInterface $user): Response
     {
         return $this->connector
             ->send(new Update($user));
@@ -93,11 +97,11 @@ class UserService extends Resource
      * Search for a user by ID or email
      *
      * @param string|int $user_id_or_email
-     * @return User|null
+     * @return UserInterface|null
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function find(string|int $user_id_or_email): User|null
+    public function find(string|int $user_id_or_email): UserInterface|null
     {
         if (is_numeric($user_id_or_email)) {
             return $this->get($user_id_or_email);
@@ -110,9 +114,9 @@ class UserService extends Resource
      * Get a user by exact email
      *
      * @param string $email
-     * @return User|null
+     * @return UserInterface|null
      */
-    public function findByEmail(string $email): ?User
+    public function findByEmail(string $email): ?UserInterface
     {
         $response = $this->connector->send(new Users([
             'query[email]' => $email,

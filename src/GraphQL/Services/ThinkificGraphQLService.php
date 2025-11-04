@@ -23,6 +23,8 @@ final class ThinkificGraphQLService implements Thinkific
     public AssignmentService $assignments;
     public SurveyService $surveys;
 
+    public CertificateService $certificates;
+
     public function __construct(string $token)
     {
         $this->token = $token;
@@ -42,6 +44,8 @@ final class ThinkificGraphQLService implements Thinkific
         $this->assignments = new AssignmentService($this);
 
         $this->surveys = new SurveyService($this);
+
+        $this->certificates = new CertificateService($this);
     }
 
     /**

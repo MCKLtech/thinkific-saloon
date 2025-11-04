@@ -3,8 +3,9 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Orders;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Orders\OrderInterface;
 
-class Order
+class Order implements OrderInterface
 {
     public function __construct(
         public int     $id,

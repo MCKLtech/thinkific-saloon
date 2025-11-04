@@ -3,8 +3,9 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Promotions;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Promotions\CreatePromotionInterface;
 
-final class CreatePromotion
+final class CreatePromotion implements CreatePromotionInterface
 {
     public function __construct(
         public string $name,

@@ -2,7 +2,9 @@
 
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Users;
 
-class CreateUser
+use WooNinja\LMSContracts\Contracts\DTOs\Users\CreateUserInterface;
+
+class CreateUser implements CreateUserInterface
 {
 
     public function __construct(

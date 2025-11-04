@@ -1,6 +1,12 @@
 {
   "name": "mckltech/thinkific-saloon",
   "description": "PHP Library for the Thinkific API using Saloon",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/MCKLtech/lms-contracts"
+    }
+  ],
   "authors": [
     {
       "name": "Colin Longworth",
@@ -12,14 +18,23 @@
     "saloonphp/saloon": "^3.0",
     "saloonphp/pagination-plugin": "^2.2",
     "saloonphp/rate-limit-plugin": "^2.0",
-    "nesbot/carbon": "*"
+    "nesbot/carbon": "*",
+    "mckltech/lms-contracts": "dev-main"
   },
   "require-dev": {
-    "spatie/ray": "*"
+    "spatie/ray": "*",
+    "phpunit/phpunit": "^10.0",
+    "mockery/mockery": "^1.6",
+    "guzzlehttp/guzzle": "^7.9"
   },
   "autoload": {
     "psr-4": {
       "WooNinja\\ThinkificSaloon\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WooNinja\\ThinkificSaloon\\Tests\\": "tests/"
     }
   },
   "minimum-stability" : "dev",

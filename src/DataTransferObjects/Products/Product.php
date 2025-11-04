@@ -3,8 +3,9 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Products;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Products\ProductInterface;
 
-class Product
+class Product implements ProductInterface
 {
     public function __construct(
         public int     $id,

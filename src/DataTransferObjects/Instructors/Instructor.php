@@ -3,8 +3,9 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Instructors;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Instructors\InstructorInterface;
 
-class Instructor
+class Instructor implements InstructorInterface
 {
     public function __construct(
         public int $id,

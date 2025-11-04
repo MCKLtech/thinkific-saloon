@@ -3,8 +3,9 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Webhooks;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Webhooks\WebhookInterface;
 
-class Webhook
+class Webhook implements WebhookInterface
 {
     public function __construct(
         public string $id,

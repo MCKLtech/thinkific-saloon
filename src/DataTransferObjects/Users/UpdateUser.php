@@ -2,7 +2,9 @@
 
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Users;
 
-class UpdateUser
+use WooNinja\LMSContracts\Contracts\DTOs\Users\UpdateUserInterface;
+
+class UpdateUser implements UpdateUserInterface
 {
     public function __construct(
         public int     $id,

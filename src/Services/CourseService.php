@@ -2,28 +2,27 @@
 
 namespace WooNinja\ThinkificSaloon\Services;
 
-
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
 use Saloon\PaginationPlugin\PagedPaginator;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Courses\Course;
-use WooNinja\ThinkificSaloon\DataTransferObjects\Products\Product;
+use WooNinja\LMSContracts\Contracts\Services\CourseServiceInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Courses\CourseInterface;
+use WooNinja\LMSContracts\Contracts\DTOs\Products\ProductInterface;
 use WooNinja\ThinkificSaloon\Requests\Courses\Chapters;
 use WooNinja\ThinkificSaloon\Requests\Courses\Courses;
 use WooNinja\ThinkificSaloon\Requests\Courses\Get;
 
-
-class CourseService extends Resource
+class CourseService extends Resource implements CourseServiceInterface
 {
     /**
      * Get a Course by its ID.
      * @see @see https://developers.thinkific.com/api/api-documentation/#/Courses/getCourseByID
      * @param int $course_id
-     * @return Course
+     * @return CourseInterface
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function get(int $course_id): Course
+    public function get(int $course_id): CourseInterface
     {
         return $this->connector
             ->send(new Get($course_id))
@@ -35,11 +34,11 @@ class CourseService extends Resource
      * Important: This expects the Course ID, not the Product / Productable ID.
      *
      * @param int $course_id
-     * @return Product
+     * @return ProductInterface
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function product(int $course_id): Product
+    public function product(int $course_id): ProductInterface
     {
         $course = $this->get($course_id);
 

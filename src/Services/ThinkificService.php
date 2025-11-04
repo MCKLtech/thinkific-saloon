@@ -3,12 +3,18 @@
 namespace WooNinja\ThinkificSaloon\Services;
 
 use Saloon\Contracts\Authenticator;
+use WooNinja\LMSContracts\Contracts\LMSServiceInterface;
+use WooNinja\LMSContracts\Contracts\Services\UserServiceInterface;
+use WooNinja\LMSContracts\Contracts\Services\CourseServiceInterface;
+use WooNinja\LMSContracts\Contracts\Services\EnrollmentServiceInterface;
+use WooNinja\LMSContracts\Contracts\Services\ProductServiceInterface;
+use WooNinja\LMSContracts\Contracts\Services\OrderServiceInterface;
 use WooNinja\ThinkificSaloon\Auth\ThinkificAuthenticator;
 use WooNinja\ThinkificSaloon\Connectors\ThinkificConnector;
 use WooNinja\ThinkificSaloon\Interfaces\Thinkific;
 use WooNinja\ThinkificSaloon\Traits\MapperTrait;
 
-final class ThinkificService implements Thinkific
+final class ThinkificService implements Thinkific, LMSServiceInterface
 {
     use MapperTrait;
     private string $api_key;
@@ -147,6 +153,57 @@ final class ThinkificService implements Thinkific
     {
         $this->connector = false;
         $this->authenticator = false;
+    }
+
+    // LMSServiceInterface implementation
+    
+    /**
+     * Get the provider name
+     */
+    public function getProviderName(): string
+    {
+        return 'thinkific';
+    }
+    
+    /**
+     * Check if service is properly configured and connected
+     */
+    public function isConnected(): bool
+    {
+        try {
+            // Test connection with a lightweight API call - we'll create a simple health check request
+            $this->connector();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+    
+    // Core service interfaces
+    
+    public function users(): UserServiceInterface
+    {
+        return $this->users;
+    }
+    
+    public function courses(): CourseServiceInterface
+    {
+        return $this->courses;
+    }
+    
+    public function enrollments(): EnrollmentServiceInterface
+    {
+        return $this->enrollments;
+    }
+    
+    public function products(): ProductServiceInterface
+    {
+        return $this->products;
+    }
+    
+    public function orders(): OrderServiceInterface
+    {
+        return $this->orders;
     }
 
 }

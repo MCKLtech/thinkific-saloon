@@ -2,7 +2,9 @@
 
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Courses;
 
-final class Course
+use WooNinja\LMSContracts\Contracts\DTOs\Courses\CourseInterface;
+
+final class Course implements CourseInterface
 {
     public function __construct(
         public int         $id,

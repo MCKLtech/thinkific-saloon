@@ -3,8 +3,9 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Coupons;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Coupons\CouponInterface;
 
-final class Coupon
+final class Coupon implements CouponInterface
 {
     public function __construct(
         public int $id,

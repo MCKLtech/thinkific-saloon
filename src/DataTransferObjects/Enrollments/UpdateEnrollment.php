@@ -3,13 +3,16 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Enrollments\UpdateEnrollmentInterface;
 
-final class UpdateEnrollment
+final class UpdateEnrollment implements UpdateEnrollmentInterface
 {
     public function __construct(
-        public int    $enrollment_id,
-        public ?Carbon $activated_at,
-        public ?Carbon $expiry_date,
+        int     $enrollment_id,
+        ?Carbon $activated_at,
+        ?Carbon $expiry_date,
+        ?int    $user_id = null,
+        ?int    $course_id = null
     )
     {
     }

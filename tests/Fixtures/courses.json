@@ -1,0 +1,58 @@
+{
+  "single_course": {
+    "id": 1,
+    "name": "My Course",
+    "slug": "my-course",
+    "subtitle": "My Course Subtitle",
+    "product_id": 0,
+    "description": "Course description",
+    "course_card_text": "my course",
+    "intro_video_youtube": "youtube01",
+    "contact_information": "Contact info",
+    "keywords": "course,learn,great",
+    "duration": "22",
+    "banner_image_url": "http://example.com/banner.jpg",
+    "course_card_image_url": "http://example.com/card.jpg",
+    "intro_video_wistia_identifier": "wistia0123",
+    "administrator_user_ids": [1, 2],
+    "chapter_ids": [1, 2],
+    "reviews_enabled": false,
+    "user_id": 1,
+    "instructor_id": 1
+  },
+  "course_list": {
+    "items": [
+      {
+        "id": 1,
+        "name": "My Course",
+        "slug": "my-course",
+        "subtitle": "My Course Subtitle",
+        "product_id": 0,
+        "description": "Course description",
+        "course_card_text": "my course",
+        "intro_video_youtube": "youtube01",
+        "contact_information": "Contact info",
+        "keywords": "course,learn,great",
+        "duration": "22",
+        "banner_image_url": "http://example.com/banner.jpg",
+        "course_card_image_url": "http://example.com/card.jpg",
+        "intro_video_wistia_identifier": "wistia0123",
+        "administrator_user_ids": [1, 2],
+        "chapter_ids": [1, 2],
+        "reviews_enabled": false,
+        "user_id": 1,
+        "instructor_id": 1
+      }
+    ],
+    "meta": {
+      "pagination": {
+        "current_page": 1,
+        "next_page": 2,
+        "prev_page": 0,
+        "total_pages": 10,
+        "total_items": 250,
+        "entries_info": "1-10 of 10"
+      }
+    }
+  }
+}

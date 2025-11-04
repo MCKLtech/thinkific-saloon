@@ -21,7 +21,7 @@ class ProductService extends Resource
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function get(int $product_id): Product
+    public function get(int $product_id): ProductInterface
     {
         return $this->connector
             ->send(new Get($product_id))

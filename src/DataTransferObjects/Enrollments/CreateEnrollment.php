@@ -3,8 +3,9 @@
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments;
 
 use Carbon\Carbon;
+use WooNinja\LMSContracts\Contracts\DTOs\Enrollments\CreateEnrollmentInterface;
 
-final class CreateEnrollment
+final class CreateEnrollment implements CreateEnrollmentInterface
 {
     public function __construct(
         public int    $user_id,
