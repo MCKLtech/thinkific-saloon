@@ -174,6 +174,22 @@ class ThinkificConnector extends Connector implements HasPagination
             protected ?int $perPageLimit = 50;
 
             /**
+             * Override count to use async to avoid loading each page in a loop
+             *
+             * @return int
+             */
+            public function count() : int
+            {
+                $this->async();
+
+                $count = parent::count();
+
+                $this->async(false);
+
+                return $count;
+            }
+
+            /**
              * The total number of results as indicated by the pagination meta from the API
              * Important: You must make at least one API call before calling this e.g. count($pages)
              *

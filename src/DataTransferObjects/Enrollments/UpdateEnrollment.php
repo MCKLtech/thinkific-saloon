@@ -8,11 +8,11 @@ use WooNinja\LMSContracts\Contracts\DTOs\Enrollments\UpdateEnrollmentInterface;
 final class UpdateEnrollment implements UpdateEnrollmentInterface
 {
     public function __construct(
-        int     $enrollment_id,
-        ?Carbon $activated_at,
-        ?Carbon $expiry_date,
-        ?int    $user_id = null,
-        ?int    $course_id = null
+        public int     $enrollment_id,
+        public ?Carbon $activated_at,
+        public ?Carbon $expiry_date,
+        public ?int    $user_id = null,
+        public ?int    $course_id = null
     )
     {
     }

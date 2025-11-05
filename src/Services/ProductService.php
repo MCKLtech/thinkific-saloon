@@ -5,19 +5,21 @@ namespace WooNinja\ThinkificSaloon\Services;
 use Saloon\Exceptions\Request\FatalRequestException;
 use Saloon\Exceptions\Request\RequestException;
 use Saloon\PaginationPlugin\PagedPaginator;
+use WooNinja\LMSContracts\Contracts\DTOs\Products\ProductInterface;
+use WooNinja\LMSContracts\Contracts\Services\ProductServiceInterface;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Products\Product;
 use WooNinja\ThinkificSaloon\Requests\Products\Get;
 use WooNinja\ThinkificSaloon\Requests\Products\Products;
 use WooNinja\ThinkificSaloon\Requests\Products\RelatedProducts;
 
-class ProductService extends Resource
+class ProductService extends Resource implements ProductServiceInterface
 {
 
     /**
      * Get Products by ID
      *
      * @param int $product_id
-     * @return Product
+     * @return ProductInterface
      * @throws FatalRequestException
      * @throws RequestException
      */
