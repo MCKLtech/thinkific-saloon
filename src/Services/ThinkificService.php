@@ -18,6 +18,7 @@ final class ThinkificService implements Thinkific, LMSServiceInterface
 {
     use MapperTrait;
     private string $api_key;
+
     public string $subdomain;
     public bool $is_oauth;
 
@@ -54,6 +55,7 @@ final class ThinkificService implements Thinkific, LMSServiceInterface
     public UserService $users;
 
     public WebhookService $webhooks;
+
     public OAuthService $oauth;
     private ThinkificConnector|bool $connector = false;
     private Authenticator|bool $authenticator = false;
@@ -156,7 +158,7 @@ final class ThinkificService implements Thinkific, LMSServiceInterface
     }
 
     // LMSServiceInterface implementation
-    
+
     /**
      * Get the provider name
      */
@@ -164,7 +166,7 @@ final class ThinkificService implements Thinkific, LMSServiceInterface
     {
         return 'thinkific';
     }
-    
+
     /**
      * Check if service is properly configured and connected
      */
@@ -177,33 +179,6 @@ final class ThinkificService implements Thinkific, LMSServiceInterface
         } catch (\Exception $e) {
             return false;
         }
-    }
-    
-    // Core service interfaces
-    
-    public function users(): UserServiceInterface
-    {
-        return $this->users;
-    }
-    
-    public function courses(): CourseServiceInterface
-    {
-        return $this->courses;
-    }
-    
-    public function enrollments(): EnrollmentServiceInterface
-    {
-        return $this->enrollments;
-    }
-    
-    public function products(): ProductServiceInterface
-    {
-        return $this->products;
-    }
-    
-    public function orders(): OrderServiceInterface
-    {
-        return $this->orders;
     }
 
 }

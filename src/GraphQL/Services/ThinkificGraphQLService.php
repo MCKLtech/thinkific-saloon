@@ -3,16 +3,16 @@
 namespace WooNinja\ThinkificSaloon\GraphQL\Services;
 
 use Saloon\Contracts\Authenticator;
+use WooNinja\LMSContracts\Contracts\LMSServiceInterface;
 use WooNinja\ThinkificSaloon\GraphQL\Auth\ThinkificAuthenticator;
 use WooNinja\ThinkificSaloon\GraphQL\Connectors\ThinkificConnector;
 use WooNinja\ThinkificSaloon\GraphQL\Interfaces\Thinkific;
 
 
-final class ThinkificGraphQLService implements Thinkific
+final class ThinkificGraphQLService implements Thinkific, LMSServiceInterface
 {
     private string $token;
     private ThinkificConnector|bool $connector = false;
-
     private Authenticator|bool $authenticator = false;
 
     public UserService $users;
@@ -22,7 +22,6 @@ final class ThinkificGraphQLService implements Thinkific
     public CourseService $courses;
     public AssignmentService $assignments;
     public SurveyService $surveys;
-
     public CertificateService $certificates;
 
     public function __construct(string $token)
@@ -101,4 +100,19 @@ final class ThinkificGraphQLService implements Thinkific
         $this->authenticator = $authenticator;
     }
 
+    public function getProviderName(): string
+    {
+        return 'thinkific_graphql';
+    }
+
+    public function isConnected(): bool
+    {
+        try {
+            // Test connection with a lightweight API call - we'll create a simple health check request
+            $this->connector();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }
