@@ -4,11 +4,6 @@ namespace WooNinja\ThinkificSaloon\Services;
 
 use Saloon\Contracts\Authenticator;
 use WooNinja\LMSContracts\Contracts\LMSServiceInterface;
-use WooNinja\LMSContracts\Contracts\Services\UserServiceInterface;
-use WooNinja\LMSContracts\Contracts\Services\CourseServiceInterface;
-use WooNinja\LMSContracts\Contracts\Services\EnrollmentServiceInterface;
-use WooNinja\LMSContracts\Contracts\Services\ProductServiceInterface;
-use WooNinja\LMSContracts\Contracts\Services\OrderServiceInterface;
 use WooNinja\ThinkificSaloon\Auth\ThinkificAuthenticator;
 use WooNinja\ThinkificSaloon\Connectors\ThinkificConnector;
 use WooNinja\ThinkificSaloon\Interfaces\Thinkific;
