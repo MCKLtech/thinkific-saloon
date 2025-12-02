@@ -2,6 +2,7 @@
 
 namespace WooNinja\ThinkificSaloon\DataTransferObjects\Users;
 
+use Carbon\Carbon;
 use WooNinja\LMSContracts\Contracts\DTOs\Users\UserInterface;
 
 final class User implements UserInterface
@@ -24,6 +25,7 @@ final class User implements UserInterface
         public ?string $affiliate_commission_type,
         public ?string $affiliate_payout_email,
         public ?array  $custom_profile_fields,
+        public ?Carbon $created_at = null
     )
     {
     }
