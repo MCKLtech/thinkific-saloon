@@ -32,7 +32,7 @@ final class Get extends Request
             name: $responseData['name'],
             description: $responseData['description'],
             starts_at: Carbon::parse($responseData['starts_at']),
-            expires_at: Carbon::parse($responseData['expires_at']),
+            expires_at: $responseData['expires_at'] ? Carbon::parse($responseData['expires_at']) : null,
             discount_type: $responseData['discount_type'],
             amount: $responseData['amount'],
             coupon_ids: $responseData['coupon_ids'],
