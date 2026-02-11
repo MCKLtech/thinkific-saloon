@@ -10,6 +10,8 @@ final readonly class Product
         public string $status,
         public string $slug,
         public string $name,
+        public ?string $productable_type = null,
+        public bool $hasCertificates = false,
     )
     {
     }
