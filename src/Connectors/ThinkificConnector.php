@@ -10,7 +10,6 @@ use Saloon\PaginationPlugin\Contracts\HasPagination;
 use Saloon\PaginationPlugin\PagedPaginator;
 use Saloon\Http\Response;
 use Saloon\RateLimitPlugin\Contracts\RateLimitStore;
-use Saloon\RateLimitPlugin\Helpers\RetryAfterHelper;
 use Saloon\RateLimitPlugin\Limit;
 use Saloon\RateLimitPlugin\Stores\MemoryStore;
 use Saloon\RateLimitPlugin\Traits\HasRateLimits;
@@ -154,8 +153,31 @@ class ThinkificConnector extends Connector implements HasPagination
             return;
         }
 
+        // Thinkific returns ratelimit-reset as a Unix timestamp in milliseconds
+        // Convert to seconds and calculate time until reset
+        $resetHeader = $response->header('ratelimit-reset');
+
+        if (empty($resetHeader)) {
+            // Fallback to 60 seconds if header is missing
+            $secondsUntilReset = 60;
+        } else {
+            $resetValue = (int) $resetHeader;
+
+            // Detect if timestamp is in milliseconds (13 digits) or seconds (10 digits)
+            // Timestamps > 10 billion are assumed to be in milliseconds
+            if ($resetValue > 10000000000) {
+                // Convert milliseconds to seconds
+                $resetTimestamp = (int) ($resetValue / 1000);
+            } else {
+                // Already in seconds
+                $resetTimestamp = $resetValue;
+            }
+
+            $secondsUntilReset = max(0, $resetTimestamp - time());
+        }
+
         $limit->exceeded(
-            releaseInSeconds: RetryAfterHelper::parse($response->header('ratelimit-reset'))
+            releaseInSeconds: $secondsUntilReset
         );
     }
 
