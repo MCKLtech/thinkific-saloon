@@ -3,6 +3,7 @@
 namespace WooNinja\ThinkificSaloon\GraphQL\Responses;
 
 use JsonException;
+use Random\RandomException;
 use Saloon\Http\Response;
 use Saloon\RateLimitPlugin\Exceptions\LimitException;
 use Saloon\RateLimitPlugin\Exceptions\RateLimitReachedException;
@@ -13,32 +14,55 @@ class ThinkificGraphQLResponse extends Response
     /**
      * @throws RateLimitReachedException
      * @throws LimitException
-     * @throws JsonException
+     * @throws JsonException|RandomException
      */
     public function json(string|int|null $key = null, mixed $default = null): mixed
     {
         /**
          * Check the response for rate limit errors
+         * Wrap in try-catch because 429 responses may contain HTML instead of JSON
          */
-        $checkData = parent::json();
+        try {
+            $checkData = parent::json();
 
-        if ($this->isRateLimitError($checkData)) {
+            if ($this->isRateLimitError($checkData)) {
 
-            /**
-             * @var ThinkificConnector $connector
-             */
-            $connector = $this->getConnector();
-            $limit = $connector?->getLimits() ?? null;
+                /**
+                 * @var ThinkificConnector $connector
+                 */
+                $connector = $this->getConnector();
+                $limit = $connector?->getLimits() ?? null;
 
-            if (!empty($limit) && is_array($limit)) {
+                if (!empty($limit) && is_array($limit)) {
 
-                $limit = $limit[0];
+                    $limit = $limit[0];
 
-                $limit->setExpiryTimestamp(time() + 60); // Set expiry to 60 seconds from now
+                    // Calculate release time based on resetAt from response
+                    $resetAt = $checkData['extensions']['rateLimit']['resetAt'] ?? null;
+                    if ($resetAt) {
+                        $resetTimestamp = strtotime($resetAt);
+                        if ($resetTimestamp !== false) {
+                            $secondsUntilReset = max(0, $resetTimestamp - time());
+                        } else {
+                            $secondsUntilReset = 60;
+                        }
+                    } else {
+                        $secondsUntilReset = 60;
+                    }
 
-                throw new RateLimitReachedException($limit);
+                    // Add jitter only if we don't have a precise reset time (thundering herd protection)
+                    if ($resetAt === null) {
+                        $secondsUntilReset = (int) (($secondsUntilReset / 2) + random_int(0, (int) ($secondsUntilReset / 2)));
+                    }
+
+                    $limit->setExpiryTimestamp(time() + $secondsUntilReset);
+
+                    throw new RateLimitReachedException($limit);
+                }
             }
-
+        } catch (\JsonException $e) {
+            // If we can't parse JSON (e.g., HTML error page on 429), 
+            // just continue and let parent::json() handle it (or throw)
         }
 
         return parent::json($key, $default);

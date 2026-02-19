@@ -98,12 +98,11 @@ class ThinkificConnector extends Connector
     }
 
     /**
-     * Retry is handled via  point value. Returned in array at end of GraphQL response.
+     * Retry is handled via point value. Returned in array at end of GraphQL response.
      *
      * @param Response $response
      * @param Limit $limit
      * @return void
-     * @throws \JsonException
      */
     protected function handleTooManyAttempts(Response $response, Limit $limit): void
     {
@@ -111,9 +110,37 @@ class ThinkificConnector extends Connector
             return;
         }
 
-        $limit->exceeded(
-            releaseInSeconds: RetryAfterHelper::parse($response->json('extensions.rateLimit.resetAt', time() + 60)),
-        );
+        $releaseInSeconds = 60; // Default fallback
+        $hasPreciseResetTime = false;
+
+        // Try to get reset time from JSON response
+        try {
+            $resetAt = $response->json('extensions.rateLimit.resetAt');
+            if ($resetAt) {
+                $parsedRelease = RetryAfterHelper::parse($resetAt);
+                if ($parsedRelease !== null) {
+                    $releaseInSeconds = $parsedRelease;
+                    $hasPreciseResetTime = true;
+                }
+            }
+        } catch (\JsonException $e) {
+            // If JSON parsing fails (e.g., HTML error page), check for Retry-After header
+            $retryAfter = $response->header('Retry-After');
+            if ($retryAfter) {
+                $parsedRelease = RetryAfterHelper::parse($retryAfter);
+                if ($parsedRelease !== null) {
+                    $releaseInSeconds = $parsedRelease;
+                    $hasPreciseResetTime = true;
+                }
+            }
+        }
+
+        // Add jitter only if we don't have a precise reset time (thundering herd protection)
+        if (!$hasPreciseResetTime) {
+            $releaseInSeconds = (int) (($releaseInSeconds / 2) + random_int(0, (int) ($releaseInSeconds / 2)));
+        }
+
+        $limit->exceeded(releaseInSeconds: $releaseInSeconds);
     }
 
     /**
