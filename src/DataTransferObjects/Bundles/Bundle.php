@@ -19,7 +19,7 @@ final class Bundle implements BundleInterface
      * @see https://developers.thinkific.com/api/api-documentation/#/Bundles/getBundleByID
      */
     public function __construct(
-        public int         $id,
+        public int|string  $id,
         public string      $name,
         public string|null $description,
         public string      $banner_image_url,

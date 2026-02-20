@@ -10,9 +10,9 @@ final class ReadEnrollment implements ReadEnrollmentInterface
 {
 
     public function __construct(
-        public int  $enrollment_id,
-        public ?int $user_id,
-        public ?int $course_id,
+        public int|string $enrollment_id,
+        public ?int       $user_id,
+        public ?int       $course_id,
     )
     {
     }
