@@ -20,6 +20,7 @@ use WooNinja\ThinkificSaloon\Senders\ProxySender;
 use Saloon\Contracts\Sender;
 use Saloon\Config;
 use WooNinja\ThinkificSaloon\Traits\HasProxies;
+use WooNinja\ThinkificSaloon\Exceptions\CloudflareException;
 
 class ThinkificConnector extends Connector implements HasPagination
 {
@@ -179,6 +180,21 @@ class ThinkificConnector extends Connector implements HasPagination
         $limit->exceeded(
             releaseInSeconds: $secondsUntilReset
         );
+    }
+
+    /**
+     * Return a CloudflareException for Cloudflare-specific status codes so that
+     * callers can distinguish transient CF errors from real origin failures and
+     * implement targeted retry logic. The PHP exception $code is set to the
+     * actual HTTP status (e.g. 520) rather than 0.
+     */
+    public function getRequestException(Response $response, ?\Throwable $senderException): ?\Throwable
+    {
+        if (CloudflareException::isCloudflareStatus($response->status())) {
+            return new CloudflareException($response, previous: $senderException);
+        }
+
+        return null;
     }
 
     /**
