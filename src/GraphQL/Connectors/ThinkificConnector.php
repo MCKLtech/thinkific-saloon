@@ -14,6 +14,7 @@ use Saloon\RateLimitPlugin\Stores\MemoryStore;
 use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 use Saloon\Traits\Plugins\AcceptsJson;
 use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
+use Saloon\Traits\Plugins\HasTimeout;
 use WooNinja\ThinkificSaloon\GraphQL\Responses\ThinkificGraphQLResponse;
 use WooNinja\ThinkificSaloon\Senders\ProxySender;
 use WooNinja\ThinkificSaloon\Traits\HasProxies;
@@ -24,6 +25,11 @@ class ThinkificConnector extends Connector
     use AlwaysThrowOnErrors;
     use HasRateLimits;
     use HasProxies;
+    use HasTimeout;
+
+    protected int $connectTimeout = 10;
+
+    protected int $requestTimeout = 30;
 
     public string $base_url = 'https://api.thinkific.com/stable/graphql';
 
@@ -56,13 +62,16 @@ class ThinkificConnector extends Connector
     protected function defaultHeaders(): array
     {
         return [
-            'User-Agent' => 'WooNinja/Saloon-GraphQL-SDK'
+            'User-Agent' => 'WooNinja/Saloon-GraphQL-SDK',
+            'Accept-Encoding' => 'gzip',
         ];
     }
 
     protected function defaultConfig(): array
     {
-        return [];
+        return [
+            'allow_redirects' => false,
+        ];
     }
 
     /**

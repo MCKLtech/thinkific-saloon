@@ -28,6 +28,11 @@ class ThinkificConnector extends Connector implements HasPagination
     use AlwaysThrowOnErrors;
     use HasRateLimits;
     use HasProxies;
+    use HasTimeout;
+
+    protected int $connectTimeout = 10;
+
+    protected int $requestTimeout = 30;
 
     public bool|RateLimitStore $rateStore = false;
 
@@ -61,13 +66,16 @@ class ThinkificConnector extends Connector implements HasPagination
     protected function defaultHeaders(): array
     {
         return [
-            'User-Agent' => 'WooNinja/Saloon-PHP-SDK'
+            'User-Agent' => 'WooNinja/Saloon-PHP-SDK',
+            'Accept-Encoding' => 'gzip',
         ];
     }
 
     protected function defaultConfig(): array
     {
-        return [];
+        return [
+            'allow_redirects' => false,
+        ];
     }
 
     /**
