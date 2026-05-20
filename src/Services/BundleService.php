@@ -103,7 +103,7 @@ class BundleService extends Resource
             productable_id: $productable_id,
             user_id: $user_id,
             activated_at: null,
-            expiry_date: Carbon::now()->startOfDay()->subSecond(),
+            expiry_date: Carbon::yesterday()->endOfDay()
         );
 
         return $this->connector

@@ -97,7 +97,7 @@ class EnrollmentService extends Resource implements EnrollmentServiceInterface
         $enrollment = new UpdateEnrollment(
             enrollment_id: $enrollment_id->enrollment_id,
             activated_at: null,
-            expiry_date: Carbon::now()
+            expiry_date: Carbon::yesterday()->endOfDay()
         );
 
         return $this->update($enrollment);
