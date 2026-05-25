@@ -13,6 +13,16 @@ final class Groups extends Request implements Paginatable
 {
     protected Method $method = Method::GET;
 
+    public function __construct(
+        private readonly array $filters = []
+    ) {
+    }
+
+    protected function defaultQuery(): array
+    {
+        return $this->filters;
+    }
+
     public function resolveEndpoint(): string
     {
         return "groups";

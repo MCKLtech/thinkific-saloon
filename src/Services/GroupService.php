@@ -42,10 +42,10 @@ class GroupService extends Resource
      *
      * @return PagedPaginator
      */
-    public function groups(): PagedPaginator
+    public function groups(array $filters = []): PagedPaginator
     {
         return $this->connector
-            ->paginate(new Groups());
+            ->paginate(new Groups($filters));
     }
 
     /**
