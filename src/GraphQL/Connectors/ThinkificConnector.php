@@ -3,12 +3,13 @@
 
 namespace WooNinja\ThinkificSaloon\GraphQL\Connectors;
 
+use ReflectionClass;
 use Saloon\Config;
 use Saloon\Contracts\Sender;
 use Saloon\Http\Connector;
+use Saloon\Http\PendingRequest;
 use Saloon\Http\Response;
 use Saloon\RateLimitPlugin\Contracts\RateLimitStore;
-use Saloon\RateLimitPlugin\Helpers\RetryAfterHelper;
 use Saloon\RateLimitPlugin\Limit;
 use Saloon\RateLimitPlugin\Stores\MemoryStore;
 use Saloon\RateLimitPlugin\Traits\HasRateLimits;
@@ -38,12 +39,20 @@ class ThinkificConnector extends Connector
     protected ?string $response = ThinkificGraphQLResponse::class;
 
     /**
-     * Thinkific Rate Limit (Point Value Complexity)
+     * Thinkific GraphQL rate limit in cost points per minute.
      *
+     * @see https://support.thinkific.dev/hc/en-us/articles/22113098742935
      * @var int
      */
-    public int $rateLimit = 10000;
+    public int $rateLimit = 2000;
 
+    public string $limiter_prefix = '';
+
+    public function __construct(
+        protected ?string $subdomain = null,
+    )
+    {
+    }
 
     public function resolveBaseUrl(): string
     {
@@ -91,11 +100,51 @@ class ThinkificConnector extends Connector
     }
 
     /**
-     * Rate limit for Thinkific.
-     * This is a workaround as Thinkific using point value, thus it is not based on time
-     * @see https://support.thinkific.dev/hc/en-us/articles/22113098742935-GraphQL-Query-Limitations#h_01HS26E3HHVSZVG5Z2EZMKQHCM
+     * Return the limiter prefix name
+     */
+    public function getLimiterPrefixName(): string
+    {
+        return $this->getLimiterPrefix();
+    }
+
+    /**
+     * Dynamically set the limiter prefix name
+     */
+    public function setLimiterPrefixName(string $prefix): void
+    {
+        $this->limiter_prefix = $prefix;
+    }
+
+    /**
+     * When a subdomain or explicit prefix is known, use it as the limiter
+     * key to avoid collisions in shared rate-limit stores (e.g. Redis).
+     * Falls back to the trait default (class short name) otherwise.
+     */
+    protected function getLimiterPrefix(): ?string
+    {
+        if (! empty($this->limiter_prefix)) {
+            return $this->limiter_prefix;
+        }
+
+        if ($this->subdomain !== null) {
+            return $this->subdomain;
+        }
+
+        return (new ReflectionClass($this))->getShortName();
+    }
+
+    /**
+     * Proactive rate limiter using the GraphQL point budget (2000 pts/min by default).
      *
-     * @return array
+     * Saloon's `requests` parameter is repurposed here as a point budget: after every
+     * response, boot() overwrites `hits` in the store with (limit - remaining) from
+     * extensions.rateLimit, so the counter always reflects actual cost consumed rather
+     * than request count. The 0.99 threshold blocks new requests when ≤20 points remain.
+     *
+     * High-cost queries that push remaining past zero are caught reactively by
+     * handleTooManyAttempts().
+     *
+     * @see https://support.thinkific.dev/hc/en-us/articles/22113098742935
      */
     protected function resolveLimits(): array
     {
@@ -107,49 +156,103 @@ class ThinkificConnector extends Connector
     }
 
     /**
-     * Retry is handled via point value. Returned in array at end of GraphQL response.
-     *
-     * @param Response $response
-     * @param Limit $limit
-     * @return void
+     * Detect GraphQL rate-limit errors, which arrive as HTTP 200 with an
+     * errors array rather than a 429. Falls back to HTTP 429 handling for
+     * edge cases (e.g. a Cloudflare or proxy layer returning a real 429).
      */
     protected function handleTooManyAttempts(Response $response, Limit $limit): void
     {
-        if ($response->status() !== 429) {
+        if ($response->status() === 429) {
+            $limit->exceeded(releaseInSeconds: 60);
             return;
         }
 
-        $releaseInSeconds = 60; // Default fallback
-        $hasPreciseResetTime = false;
-
-        // Try to get reset time from JSON response
         try {
+            $errors = $response->json('errors');
+
+            if (!is_array($errors)) {
+                return;
+            }
+
+            $isRateLimited = false;
+            foreach ($errors as $error) {
+                if (
+                    ($error['extensions']['code'] ?? null) === 'RATE_LIMITED' ||
+                    ($error['message'] ?? '') === 'API rate limit exceeded.'
+                ) {
+                    $isRateLimited = true;
+                    break;
+                }
+            }
+
+            if (!$isRateLimited) {
+                return;
+            }
+
+            $secondsUntilReset = 60;
             $resetAt = $response->json('extensions.rateLimit.resetAt');
+
             if ($resetAt) {
-                $parsedRelease = RetryAfterHelper::parse($resetAt);
-                if ($parsedRelease !== null) {
-                    $releaseInSeconds = $parsedRelease;
-                    $hasPreciseResetTime = true;
+                $resetTimestamp = strtotime($resetAt);
+                if ($resetTimestamp !== false) {
+                    $secondsUntilReset = max(1, $resetTimestamp - time());
                 }
             }
+
+            $limit->exceeded(releaseInSeconds: $secondsUntilReset);
+
         } catch (\JsonException $e) {
-            // If JSON parsing fails (e.g., HTML error page), check for Retry-After header
-            $retryAfter = $response->header('Retry-After');
-            if ($retryAfter) {
-                $parsedRelease = RetryAfterHelper::parse($retryAfter);
-                if ($parsedRelease !== null) {
-                    $releaseInSeconds = $parsedRelease;
-                    $hasPreciseResetTime = true;
-                }
+            $limit->exceeded(releaseInSeconds: 60);
+        }
+    }
+
+    /**
+     * Sync the local cost-point counter with the authoritative remaining budget
+     * returned in every GraphQL response. This keeps the shared Redis store
+     * accurate across parallel Laravel queue workers.
+     */
+    public function boot(PendingRequest $pendingRequest): void
+    {
+        $pendingRequest->middleware()->onResponse(function (Response $response): Response {
+            try {
+                $rateLimitData = $response->json('extensions.rateLimit');
+            } catch (\JsonException $e) {
+                return $response;
             }
-        }
 
-        // Add jitter only if we don't have a precise reset time (thundering herd protection)
-        if (!$hasPreciseResetTime) {
-            $releaseInSeconds = (int) (($releaseInSeconds / 2) + random_int(0, (int) ($releaseInSeconds / 2)));
-        }
+            if (!is_array($rateLimitData) || !isset($rateLimitData['remaining'])) {
+                return $response;
+            }
 
-        $limit->exceeded(releaseInSeconds: $releaseInSeconds);
+            $remaining = (int) $rateLimitData['remaining'];
+            $apiLimit = (int) ($rateLimitData['limit'] ?? $this->rateLimit);
+            $used = max(0, $apiLimit - $remaining);
+
+            $resetAt = $rateLimitData['resetAt'] ?? null;
+            if ($resetAt) {
+                $resetTimestamp = strtotime($resetAt);
+                $resetTimestamp = $resetTimestamp !== false ? $resetTimestamp : time() + 60;
+            } else {
+                $resetTimestamp = time() + 60;
+            }
+
+            $ttl = max(1, $resetTimestamp - time());
+            $store = $this->rateLimitStore();
+
+            foreach ($this->getLimits() as $limit) {
+                if ($limit->usesResponse()) {
+                    continue; // skip the custom "too many attempts" limiter
+                }
+
+                $store->set(
+                    key: $limit->getName(),
+                    value: json_encode(['timestamp' => $resetTimestamp, 'hits' => $used], JSON_THROW_ON_ERROR),
+                    ttl: $ttl,
+                );
+            }
+
+            return $response;
+        });
     }
 
     /**

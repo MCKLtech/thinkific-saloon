@@ -5,6 +5,7 @@ namespace WooNinja\ThinkificSaloon\Connectors;
 
 use ReflectionClass;
 use Saloon\Http\Connector;
+use Saloon\Http\PendingRequest;
 use Saloon\Http\Request;
 use Saloon\PaginationPlugin\Contracts\HasPagination;
 use Saloon\PaginationPlugin\PagedPaginator;
@@ -140,6 +141,52 @@ class ThinkificConnector extends Connector implements HasPagination
             return "{$this->subdomain}";
         }
         return $this->limiter_prefix;
+    }
+
+    /**
+     * Sync the local rate-limit counter with the authoritative remaining count
+     * returned by Thinkific in every REST response. This ensures the shared
+     * Redis store stays accurate across parallel Laravel queue workers rather
+     * than relying on the naive +1 increment from Saloon's pipeline alone.
+     */
+    public function boot(PendingRequest $pendingRequest): void
+    {
+        $pendingRequest->middleware()->onResponse(function (Response $response): Response {
+            $remaining = $response->header('ratelimit-remaining');
+
+            if ($remaining === null) {
+                return $response;
+            }
+
+            $used = max(0, $this->rateLimit - (int) $remaining);
+
+            $resetHeader = $response->header('ratelimit-reset');
+            if ($resetHeader !== null) {
+                $resetValue = (int) $resetHeader;
+                $resetTimestamp = $resetValue > 10_000_000_000
+                    ? (int) ($resetValue / 1000)
+                    : $resetValue;
+            } else {
+                $resetTimestamp = time() + 60;
+            }
+
+            $ttl = max(1, $resetTimestamp - time());
+            $store = $this->rateLimitStore();
+
+            foreach ($this->getLimits() as $limit) {
+                if ($limit->usesResponse()) {
+                    continue; // skip the custom "too many attempts" limiter
+                }
+
+                $store->set(
+                    key: $limit->getName(),
+                    value: json_encode(['timestamp' => $resetTimestamp, 'hits' => $used], JSON_THROW_ON_ERROR),
+                    ttl: $ttl,
+                );
+            }
+
+            return $response;
+        });
     }
 
     /**

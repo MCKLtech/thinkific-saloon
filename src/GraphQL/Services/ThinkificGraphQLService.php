@@ -12,6 +12,7 @@ use WooNinja\ThinkificSaloon\GraphQL\Interfaces\Thinkific;
 final class ThinkificGraphQLService implements Thinkific, LMSServiceInterface
 {
     private string $token;
+    private ?string $subdomain;
     private ThinkificConnector|bool $connector = false;
     private Authenticator|bool $authenticator = false;
 
@@ -25,9 +26,10 @@ final class ThinkificGraphQLService implements Thinkific, LMSServiceInterface
     public CertificateService $certificates;
     public ProductService $products;
 
-    public function __construct(string $token)
+    public function __construct(string $token, ?string $subdomain = null)
     {
         $this->token = $token;
+        $this->subdomain = $subdomain;
 
         $this->boot();
 
@@ -62,7 +64,7 @@ final class ThinkificGraphQLService implements Thinkific, LMSServiceInterface
         /**
          * Default Connector
          */
-        return (new ThinkificConnector())
+        return (new ThinkificConnector($this->subdomain))
             ->authenticate($this->authenticator());
 
     }
