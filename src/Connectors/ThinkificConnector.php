@@ -158,7 +158,9 @@ class ThinkificConnector extends Connector implements HasPagination
                 return $response;
             }
 
-            $used = max(0, $this->rateLimit - (int) $remaining);
+            $limitHeader = $response->header('ratelimit-limit');
+            $effectiveLimit = $limitHeader !== null ? (int) $limitHeader : $this->rateLimit;
+            $used = max(0, $effectiveLimit - (int) $remaining);
 
             $resetHeader = $response->header('ratelimit-reset');
             if ($resetHeader !== null) {
