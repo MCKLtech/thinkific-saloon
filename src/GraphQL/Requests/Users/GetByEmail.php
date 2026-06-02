@@ -7,6 +7,7 @@ use Saloon\Enums\Method;
 use Saloon\Http\Request;
 use Saloon\Http\Response;
 use Saloon\Traits\Body\HasJsonBody;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\Avatar;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\User;
 
 final class GetByEmail extends Request implements HasBody
@@ -16,7 +17,8 @@ final class GetByEmail extends Request implements HasBody
     use HasJsonBody;
 
     public function __construct(
-        private readonly string $email
+        private readonly string $email,
+        private readonly int $custom_fields_per_page = 50
     )
     {
     }
@@ -38,6 +40,12 @@ final class GetByEmail extends Request implements HasBody
             last_name: $user['lastName'],
             has_admin_role: $user['hasAdminRole'],
             custom_profile_fields: $user['customProfileFields'],
+            avatar: isset($user['profile']['avatar'])
+                ? new Avatar(
+                    url: $user['profile']['avatar']['url'],
+                    alt_text: $user['profile']['avatar']['altText'] ?? null,
+                )
+                : null,
         );
     }
 
@@ -77,7 +85,7 @@ final class GetByEmail extends Request implements HasBody
     ',
             'variables' => [
                 'email' => $this->email,
-                'first' => 100
+                'first' => $this->custom_fields_per_page
             ]
         ];
 

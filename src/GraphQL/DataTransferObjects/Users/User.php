@@ -12,6 +12,7 @@ final class User
         public ?string $last_name = null,
         public ?bool  $has_admin_role = null,
         public ?array $custom_profile_fields = null,
+        public ?Avatar $avatar = null,
     ) {
     }
     public function getFullName(): string

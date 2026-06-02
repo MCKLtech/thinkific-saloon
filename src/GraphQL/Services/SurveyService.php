@@ -12,11 +12,13 @@ class SurveyService extends Resource
      * Return a list of Surveys
      *
      * @param int $per_page
+     * @param int $questions_per_page
+     * @param int $choices_per_page
      * @return Paginator
      */
-    public function surveys(int $per_page = 25): Paginator
+    public function surveys(int $per_page = 25, int $questions_per_page = 50, int $choices_per_page = 25): Paginator
     {
-        $surveys = new Surveys($per_page);
+        $surveys = new Surveys($per_page, $questions_per_page, $choices_per_page);
 
         return $surveys->paginate($this->connector);
 

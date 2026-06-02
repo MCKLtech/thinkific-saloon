@@ -13,6 +13,7 @@ use Saloon\PaginationPlugin\Contracts\Paginatable;
 use Saloon\PaginationPlugin\CursorPaginator;
 use Saloon\PaginationPlugin\Paginator;
 use Saloon\Traits\Body\HasJsonBody;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\Avatar;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\User;
 
 final class Users extends Request implements HasBody, HasRequestPagination, Paginatable
@@ -25,6 +26,7 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
 
     public function __construct(
         private readonly int $per_page = 100,
+        private readonly int $custom_fields_per_page = 50,
     )
     {
     }
@@ -44,6 +46,12 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
             last_name: $user['node']['lastName'],
             has_admin_role: $user['node']['hasAdminRole'] ?? null,
             custom_profile_fields: $user['node']['customProfileFields'] ?? null,
+            avatar: isset($user['node']['profile']['avatar'])
+                ? new Avatar(
+                    url: $user['node']['profile']['avatar']['url'],
+                    alt_text: $user['node']['profile']['avatar']['altText'] ?? null,
+                )
+                : null,
         ), $response->json('data.site.users.edges'));
     }
 
@@ -51,7 +59,7 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
     {
 
         return [
-            'query' => 'query SiteUsers($first: Int, $after: String) {
+            'query' => 'query SiteUsers($first: Int, $after: String, $customFieldsFirst: Int) {
   site {
     users(first: $first, after: $after) {
       pageInfo {
@@ -68,7 +76,7 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
     firstName
      lastName
     hasAdminRole
-    customProfileFields(first: $first) {
+    customProfileFields(first: $customFieldsFirst) {
       edges {
         cursor
         node {
@@ -94,7 +102,8 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
   }',
             'variables' => [
                 'first' => $this->per_page,
-                'after' => $this->after
+                'after' => $this->after,
+                'customFieldsFirst' => $this->custom_fields_per_page
             ]
         ];
     }

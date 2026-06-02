@@ -47,6 +47,23 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
             return [];
         }
 
+        // We filter to a single course, so the course/product is constant across every
+        // certificate. Build it once at the course-node level and reuse it per DTO.
+        $courseDto = new Course(
+            id: (int)$course['id'],
+            title: $course['title'],
+            name: $course['name'],
+            slug: $course['slug'],
+        );
+
+        $productDto = new Product(
+            id: $course['product']['id'],
+            productable_id: $course['product']['productableId'],
+            status: $course['product']['status'],
+            slug: $course['product']['slug'],
+            name: $course['product']['name']
+        );
+
         return array_map(fn($certificate) => new Certificate(
             id: $certificate['id'],
             credential_id: $certificate['credentialId'],
@@ -62,19 +79,8 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
                 has_admin_role: null,
                 custom_profile_fields: null,
             ),
-            course: new Course(
-                id: (int)$certificate['course']['id'],
-                title: $certificate['course']['title'],
-                name: $certificate['course']['name'],
-                slug: $certificate['course']['slug'],
-            ),
-            product: new Product(
-                id: $certificate['course']['product']['id'],
-                productable_id: $certificate['course']['product']['productableId'],
-                status: $certificate['course']['product']['status'],
-                slug: $certificate['course']['product']['slug'],
-                name: $certificate['course']['product']['name']
-            ),
+            course: $courseDto,
+            product: $productDto,
         ), $course['certificates']['nodes']);
     }
 
@@ -93,6 +99,15 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
       nodes {
         name
         id
+        slug
+        title
+        product {
+          id
+          productableId
+          status
+          slug
+          name
+        }
         certificates(first: $certificatesFirst, after: $certificatesAfter) {
           nodes {
             issuedAt
@@ -100,19 +115,6 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
             pdfDownloadPath
             expiryDate
             credentialId
-            course {
-          id
-          slug
-          title
-          name
-          product {
-            id
-            productableId
-            status
-            slug
-            name
-          }
-        }
             user {
               id
               gid

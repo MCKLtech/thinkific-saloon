@@ -27,7 +27,9 @@ final class Surveys extends Request implements HasBody, HasRequestPagination, Pa
     public ?string $after = null;
 
     public function __construct(
-        private readonly int $per_page = 25
+        private readonly int $per_page = 25,
+        private readonly int $questions_per_page = 50,
+        private readonly int $choices_per_page = 25
     )
     {
     }
@@ -94,8 +96,8 @@ final class Surveys extends Request implements HasBody, HasRequestPagination, Pa
             'variables' => [
                 'first' => $this->per_page,
                 'after' => $this->after,
-                'questionsFirst2' => $this->per_page,
-                'choicesFirst2' => $this->per_page
+                'questionsFirst2' => $this->questions_per_page,
+                'choicesFirst2' => $this->choices_per_page
             ]
         ];
     }

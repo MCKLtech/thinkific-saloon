@@ -21,14 +21,15 @@ class UserService extends Resource
     /**
      * Get a User by their GID
      * @param string $gid
+     * @param int $custom_fields_per_page
      * @return User
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function get(string $gid): User
+    public function get(string $gid, int $custom_fields_per_page = 50): User
     {
         return $this->connector
-            ->send(new Get($gid))
+            ->send(new Get($gid, $custom_fields_per_page))
             ->dtoOrFail();
     }
 
@@ -36,11 +37,12 @@ class UserService extends Resource
      * Return a list of Users
      *
      * @param int $per_page
+     * @param int $custom_fields_per_page
      * @return Paginator
      */
-    public function users(int $per_page = 100): Paginator
+    public function users(int $per_page = 100, int $custom_fields_per_page = 50): Paginator
     {
-        $users = new Users($per_page);
+        $users = new Users($per_page, $custom_fields_per_page);
 
         return $users->paginate($this->connector);
 
@@ -50,14 +52,15 @@ class UserService extends Resource
      * Get a user by email address
      *
      * @param string $email
+     * @param int $custom_fields_per_page
      * @return User
      * @throws FatalRequestException
      * @throws RequestException
      */
-    public function getByEmail(string $email): User
+    public function getByEmail(string $email, int $custom_fields_per_page = 50): User
     {
         return $this->connector
-            ->send(new GetByEmail($email))
+            ->send(new GetByEmail($email, $custom_fields_per_page))
             ->dtoOrFail();
     }
 

@@ -110,12 +110,12 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
         return new class(connector: $connector, request: $this) extends CursorPaginator {
             protected function getNextCursor(Response $response): int|string
             {
-                return $response->json('data.course.curriculum.chapters.endCursor');
+                return $response->json('data.course.curriculum.chapters.pageInfo.endCursor');
             }
 
             protected function isLastPage(Response $response): bool
             {
-                return empty($response->json('data.course.curriculum.chapters.hasNextPage'));
+                return empty($response->json('data.course.curriculum.chapters.pageInfo.hasNextPage'));
             }
 
             protected function getPageItems(Response $response, Request $request): array

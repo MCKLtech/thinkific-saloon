@@ -46,19 +46,23 @@ final class CertificatesForUser extends Request implements HasBody, HasRequestPa
             return [];
         }
 
+        // Every certificate belongs to the user we queried by email, so the user is
+        // fetched once at the userByEmail level and reused for each certificate DTO.
+        $owner = new User(
+            id: $user['id'],
+            email: $user['email'],
+            gid: $user['gid'],
+            first_name: $user['firstName'],
+            last_name: $user['lastName'],
+        );
+
         return array_map(fn($certificate) => new Certificate(
             id: $certificate['id'],
             credential_id: $certificate['credentialId'],
             pdf_download_path: $certificate['pdfDownloadPath'],
             issued_at: Carbon::parse($certificate['issuedAt']),
             expiry_date: isset($certificate['expiryDate']) ? Carbon::parse($certificate['expiryDate']) : null,
-            user: new User(
-                id: $certificate['user']['id'],
-                email: $certificate['user']['email'],
-                gid: $certificate['user']['gid'],
-                first_name: $certificate['user']['firstName'],
-                last_name: $certificate['user']['lastName'],
-            ),
+            user: $owner,
             course: new Course(
                 id: (int) $certificate['course']['id'],
                 title: $certificate['course']['title'],
@@ -86,6 +90,11 @@ final class CertificatesForUser extends Request implements HasBody, HasRequestPa
         return [
             'query' => 'query Certificates($email: EmailAddress!, $first: Int, $after: String) {
   userByEmail(email: $email) {
+    id
+    firstName
+    lastName
+    email
+    gid
     certificates(first: $first, after: $after) {
       nodes {
         credentialId
@@ -93,13 +102,6 @@ final class CertificatesForUser extends Request implements HasBody, HasRequestPa
         id
         issuedAt
         pdfDownloadPath
-        user {
-          id
-          firstName
-          lastName
-          email
-          gid
-        }
         course {
           id
           slug

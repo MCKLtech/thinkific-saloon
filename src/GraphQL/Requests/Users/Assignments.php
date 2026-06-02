@@ -57,6 +57,8 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
             name: $submission['node']['file']['name'],
             type: $submission['node']['file']['type'],
             url: $submission['node']['file']['url'],
+            lesson_id: $submission['node']['assignment']['lesson']['id'],
+            lesson_name: $submission['node']['assignment']['lesson']['title'],
             chapter_id: $submission['node']['assignment']['lesson']['chapter']['id'],
             chapter_name: $submission['node']['assignment']['lesson']['chapter']['title'],
             product_id: $submission['node']['assignment']['lesson']['course']['product']['id'],
@@ -100,6 +102,8 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
           createdAt
           assignment {
             lesson {
+              id
+              title
               chapter {
                 id
                 title
