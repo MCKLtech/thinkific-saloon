@@ -160,6 +160,12 @@ class ThinkificConnector extends Connector
      * errors array rather than a 429. Falls back to HTTP 429 handling for
      * edge cases (e.g. a Cloudflare or proxy layer returning a real 429).
      */
+    protected function getTooManyAttemptsLimiter(): ?Limit
+    {
+        return (new Limit(3, 1.0, $this->handleTooManyAttempts(...)))
+            ->everySeconds(60, 'custom');
+    }
+
     protected function handleTooManyAttempts(Response $response, Limit $limit): void
     {
         if ($response->status() === 429) {
@@ -199,7 +205,10 @@ class ThinkificConnector extends Connector
                 }
             }
 
-            $limit->exceeded(releaseInSeconds: $secondsUntilReset);
+            $limit->hit();
+            if ($limit->hasReachedLimit()) {
+                $limit->exceeded(releaseInSeconds: $secondsUntilReset);
+            }
 
         } catch (\JsonException $e) {
             $limit->exceeded(releaseInSeconds: 60);

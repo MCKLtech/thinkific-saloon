@@ -205,6 +205,12 @@ class ThinkificConnector extends Connector implements HasPagination
         ];
     }
 
+    protected function getTooManyAttemptsLimiter(): ?Limit
+    {
+        return (new Limit(3, 1.0, $this->handleTooManyAttempts(...)))
+            ->everySeconds(60, 'custom');
+    }
+
     protected function handleTooManyAttempts(Response $response, Limit $limit): void
     {
         if ($response->status() !== 429) {
@@ -234,9 +240,10 @@ class ThinkificConnector extends Connector implements HasPagination
             $secondsUntilReset = max(0, $resetTimestamp - time());
         }
 
-        $limit->exceeded(
-            releaseInSeconds: $secondsUntilReset
-        );
+        $limit->hit();
+        if ($limit->hasReachedLimit()) {
+            $limit->exceeded(releaseInSeconds: $secondsUntilReset);
+        }
     }
 
     /**
