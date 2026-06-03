@@ -169,7 +169,10 @@ class ThinkificConnector extends Connector
     protected function handleTooManyAttempts(Response $response, Limit $limit): void
     {
         if ($response->status() === 429) {
-            $limit->exceeded(releaseInSeconds: 60);
+            $limit->hit();
+            if ($limit->hasReachedLimit()) {
+                $limit->exceeded(releaseInSeconds: 60);
+            }
             return;
         }
 
