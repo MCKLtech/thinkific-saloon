@@ -6,7 +6,7 @@ final class Quiz
 {
     public function __construct(
         public string $id,
-        public string $name,
+        public ?string $name = null,
         public ?int   $passingScore = null,
     )
     {

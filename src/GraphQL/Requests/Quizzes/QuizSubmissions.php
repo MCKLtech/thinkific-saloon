@@ -53,11 +53,11 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
             createdAt: Carbon::parse($submission['createdAt']),
             quiz: new Quiz(
                 id: $submission['quiz']['id'],
-                name: $submission['quiz']['name'],
+                name: $submission['quiz']['name'] ?? null,
                 passingScore: $submission['quiz']['passingScore'] ?? null,
             ),
             user: new User(
-                id: $submission['user']['id'],
+                id: (int)$submission['user']['id'],
                 email: $submission['user']['email'],
                 first_name: $submission['user']['firstName'] ?? null,
                 last_name: $submission['user']['lastName'] ?? null,

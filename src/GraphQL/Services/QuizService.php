@@ -33,6 +33,6 @@ class QuizService extends Resource
      */
     public function submissionsForUser(int $userId, int $per_page = 25, int $answers_per_page = 25): Paginator
     {
-        return $this->submissions(['userIds' => $userId], $per_page, $answers_per_page);
+        return $this->submissions(['userIds' => [$userId]], $per_page, $answers_per_page);
     }
 }
