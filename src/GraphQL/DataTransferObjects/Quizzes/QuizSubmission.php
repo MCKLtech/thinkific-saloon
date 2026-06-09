@@ -22,4 +22,15 @@ final class QuizSubmission
     )
     {
     }
+
+    public function percentageScore(): float
+    {
+        $total = $this->correctCount + $this->incorrectCount;
+
+        if ($total === 0) {
+            return 0.0;
+        }
+
+        return round(($this->correctCount / $total) * 100, 2);
+    }
 }
