@@ -25,6 +25,7 @@ final class ThinkificGraphQLService implements Thinkific, LMSServiceInterface
     public SurveyService $surveys;
     public CertificateService $certificates;
     public ProductService $products;
+    public QuizService $quizzes;
 
     public function __construct(string $token, ?string $subdomain = null)
     {
@@ -50,6 +51,7 @@ final class ThinkificGraphQLService implements Thinkific, LMSServiceInterface
         $this->certificates = new CertificateService($this);
 
         $this->products = new ProductService($this);
+        $this->quizzes = new QuizService($this);
     }
 
     /**
