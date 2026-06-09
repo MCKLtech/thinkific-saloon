@@ -65,11 +65,11 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
             userAnswers: array_map(fn($answer) => new QuizAnswer(
                 question: new QuizQuestion(
                     id: $answer['question']['id'],
-                    prompt: $answer['question']['prompt'] ?? null,
+                    prompt: isset($answer['question']['prompt']) ? trim(strip_tags($answer['question']['prompt'])) : null,
                 ),
                 choices: array_map(fn($choice) => new QuizChoice(
                     id: $choice['id'],
-                    text: $choice['text'] ?? null,
+                    text: isset($choice['text']) ? trim(strip_tags($choice['text'])) : null,
                     position: $choice['position'] ?? null,
                     correct: $choice['correct'] ?? false,
                 ), $answer['choices']),
