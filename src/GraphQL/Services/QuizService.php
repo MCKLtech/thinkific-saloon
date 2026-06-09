@@ -17,7 +17,7 @@ class QuizService extends Resource
      * @param int   $answers_per_page
      * @return Paginator
      */
-    public function submissions(array $filter = [], int $per_page = 25, int $answers_per_page = 25): Paginator
+    public function submissions(array $filter = [], int $per_page = 10, int $answers_per_page = 10): Paginator
     {
         return (new QuizSubmissions($filter, $per_page, $answers_per_page))
             ->paginate($this->connector);
@@ -31,7 +31,7 @@ class QuizService extends Resource
      * @param int $answers_per_page
      * @return Paginator
      */
-    public function submissionsForUser(int $userId, int $per_page = 25, int $answers_per_page = 25): Paginator
+    public function submissionsForUser(int $userId, int $per_page = 10, int $answers_per_page = 10): Paginator
     {
         return $this->submissions(['userIds' => [$userId]], $per_page, $answers_per_page);
     }

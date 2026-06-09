@@ -30,8 +30,8 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
 
     public function __construct(
         private readonly array $filter = [],
-        private readonly int   $per_page = 25,
-        private readonly int   $answers_per_page = 25,
+        private readonly int   $per_page = 10,
+        private readonly int   $answers_per_page = 10,
     )
     {
     }
@@ -43,6 +43,8 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
 
     public function createDtoFromResponse(Response $response): array
     {
+
+        ray($response);
         return array_map(fn($submission) => new QuizSubmission(
             id: $submission['id'],
             attempts: $submission['attempts'],
