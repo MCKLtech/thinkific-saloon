@@ -51,6 +51,8 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
             custom_profile_fields: $assignmentUser['customProfileFields'] ?? null,
         );
 
+        $edges = $response->json('data.user.assignmentSubmissions.edges') ?? [];
+
         return array_map(fn($submission) => new Submission(
             id: $submission['node']['id'],
             status: $submission['node']['status'],
@@ -67,7 +69,7 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
             updated_at: Carbon::parse($submission['node']['updatedAt']),
             created_at: Carbon::parse($submission['node']['createdAt']),
             user: $user
-        ), $response->json('data.user.assignmentSubmissions.edges'));
+        ), $edges);
     }
 
     protected function defaultBody(): array

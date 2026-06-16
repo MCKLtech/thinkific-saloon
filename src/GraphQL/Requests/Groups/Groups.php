@@ -36,11 +36,13 @@ final class Groups extends Request implements HasBody, HasRequestPagination, Pag
 
     public function createDtoFromResponse(Response $response): array
     {
+        $nodes = $response->json('data.site.groups.nodes') ?? [];
+
         return array_map(fn($group) => new Group(
             created_at: Carbon::parse($group['createdAt']),
             id: $group['id'],
             name: $group['name']
-        ), $response->json('data.site.groups.nodes'));
+        ), $nodes);
     }
 
     protected function defaultBody(): array

@@ -35,12 +35,14 @@ final class Courses extends Request implements HasBody, HasRequestPagination, Pa
 
     public function createDtoFromResponse(Response $response): array
     {
+        $nodes = $response->json('data.site.courses.nodes') ?? [];
+
         return array_map(fn($course) => new Course(
             id: $course['id'],
             title: $course['title'],
             name: $course['name'],
             slug: $course['slug']
-        ), $response->json('data.site.courses.nodes'));
+        ), $nodes);
     }
 
     protected function defaultBody(): array

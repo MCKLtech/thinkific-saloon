@@ -39,6 +39,8 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
 
     public function createDtoFromResponse(Response $response): array
     {
+        $nodes = $response->json('data.course.curriculum.chapters.nodes') ?? [];
+
         return array_map(fn($chapter) => new Chapter(
             id: $chapter['id'],
             position: $chapter['position'],
@@ -50,10 +52,11 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
                 takeUrl: $lesson['takeUrl'],
                 content: new Content(
                     id: $lesson['content']['id'],
-                    contentType: $lesson['content']['contentType']
+                    contentType: $lesson['content']['contentType'],
+                    quizId: $lesson['content']['quiz']['id'] ?? null
                 )
-            ), $chapter['lessons']['nodes'])
-        ), $response->json('data.course.curriculum.chapters.nodes'));
+            ), $chapter['lessons']['nodes'] ?? [])
+        ), $nodes);
     }
 
     protected function defaultBody(): array
@@ -78,6 +81,11 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
               content {
                 contentType
                 id
+                ... on QuizContent {
+                  quiz {
+                    id
+                  }
+                }
               }
             }
           }

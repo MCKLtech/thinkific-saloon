@@ -38,6 +38,8 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
 
     public function createDtoFromResponse(Response $response): array
     {
+        $edges = $response->json('data.site.users.edges') ?? [];
+
         return array_map(fn($user) => new User(
             id: $user['node']['id'],
             email: $user['node']['email'],
@@ -52,7 +54,7 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
                     alt_text: $user['node']['profile']['avatar']['altText'] ?? null,
                 )
                 : null,
-        ), $response->json('data.site.users.edges'));
+        ), $edges);
     }
 
     protected function defaultBody(): array

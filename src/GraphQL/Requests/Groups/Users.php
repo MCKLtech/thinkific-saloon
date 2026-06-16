@@ -37,6 +37,8 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
 
     public function createDtoFromResponse(Response $response): array
     {
+        $edges = $response->json('data.group.users.edges') ?? [];
+
         return array_map(fn($user) => new User(
             id: $user['node']['id'],
             email: $user['node']['email'],
@@ -45,7 +47,7 @@ final class Users extends Request implements HasBody, HasRequestPagination, Pagi
             last_name: $user['node']['lastName'],
             has_admin_role: $user['node']['hasAdminRole'] ?? null,
             custom_profile_fields: $user['node']['customProfileFields'] ?? null,
-        ), $response->json('data.group.users.edges'));
+        ), $edges);
     }
 
     protected function defaultBody(): array

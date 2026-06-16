@@ -43,6 +43,8 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
 
     public function createDtoFromResponse(Response $response): array
     {
+        $nodes = $response->json('data.site.quizSubmissions.nodes') ?? [];
+
         return array_map(fn($submission) => new QuizSubmission(
             id: $submission['id'],
             attempts: $submission['attempts'],
@@ -72,9 +74,9 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
                     text: isset($choice['text']) ? trim(strip_tags($choice['text'])) : null,
                     position: $choice['position'] ?? null,
                     correct: $choice['correct'] ?? false,
-                ), $answer['choices']),
-            ), $submission['userAnswers']['nodes']),
-        ), $response->json('data.site.quizSubmissions.nodes'));
+                ), $answer['choices'] ?? []),
+            ), $submission['userAnswers']['nodes'] ?? []),
+        ), $nodes);
     }
 
     protected function defaultBody(): array

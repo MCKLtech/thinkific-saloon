@@ -41,6 +41,8 @@ final class Surveys extends Request implements HasBody, HasRequestPagination, Pa
 
     public function createDtoFromResponse(Response $response): array
     {
+        $nodes = $response->json('data.site.surveys.nodes') ?? [];
+
         return array_map(fn($survey) => new Survey(
             id: $survey['id'],
             created_at: Carbon::parse($survey['createdAt']),
@@ -53,10 +55,10 @@ final class Surveys extends Request implements HasBody, HasRequestPagination, Pa
                     id: $choice['id'],
                     text: $choice['text'],
                     position: $choice['position']
-                ), $question['choices']['nodes'])
-            ), $survey['questions']['nodes'])
+                ), $question['choices']['nodes'] ?? [])
+            ), $survey['questions']['nodes'] ?? [])
 
-        ), $response->json('data.site.surveys.nodes'));
+        ), $nodes);
     }
 
     protected function defaultBody(): array

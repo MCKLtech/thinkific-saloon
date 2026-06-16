@@ -39,6 +39,8 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
 
     public function createDtoFromResponse(Response $response): array
     {
+        $edges = $response->json('data.site.assignmentSubmissions.edges') ?? [];
+
         return array_map(fn($submission) => new Submission(
             id: $submission['node']['id'],
             status: $submission['node']['status'],
@@ -63,7 +65,7 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
                 has_admin_role: $submission['node']['user']['hasAdminRole'] ?? null,
                 custom_profile_fields: $submission['node']['user']['customProfileFields'] ?? null,
             )
-        ), $response->json('data.site.assignmentSubmissions.edges'));
+        ), $edges);
     }
 
     protected function defaultBody(): array
