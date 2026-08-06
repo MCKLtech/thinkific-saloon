@@ -4,9 +4,15 @@ namespace WooNinja\ThinkificSaloon\Tests\Unit\Services;
 
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\CreateEnrollment;
+use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\DeleteEnrollment;
 use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\Enrollment;
+use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\ReadEnrollment;
+use WooNinja\ThinkificSaloon\DataTransferObjects\Enrollments\UpdateEnrollment;
+use WooNinja\ThinkificSaloon\Requests\Enrollments\Create;
 use WooNinja\ThinkificSaloon\Requests\Enrollments\Get;
 use WooNinja\ThinkificSaloon\Requests\Enrollments\Enrollments;
+use WooNinja\ThinkificSaloon\Requests\Enrollments\Update;
 use WooNinja\ThinkificSaloon\Tests\TestCase;
 
 class EnrollmentServiceTest extends TestCase
@@ -21,7 +27,7 @@ class EnrollmentServiceTest extends TestCase
         ]);
 
         // Act
-        $enrollment = $this->service->enrollments->get(500);
+        $enrollment = $this->service->enrollments->get(new ReadEnrollment(enrollment_id: 500, user_id: null, course_id: null));
 
         // Assert
         $this->assertInstanceOf(Enrollment::class, $enrollment);
@@ -83,7 +89,7 @@ class EnrollmentServiceTest extends TestCase
         ]);
 
         // Act
-        $enrollment = $this->service->enrollments->get(600);
+        $enrollment = $this->service->enrollments->get(new ReadEnrollment(enrollment_id: 600, user_id: null, course_id: null));
 
         // Assert - Check completion tracking fields
         $this->assertEquals(75, $enrollment->percentage_completed);
@@ -109,7 +115,7 @@ class EnrollmentServiceTest extends TestCase
         ]);
 
         // Act
-        $enrollment = $this->service->enrollments->get(700);
+        $enrollment = $this->service->enrollments->get(new ReadEnrollment(enrollment_id: 700, user_id: null, course_id: null));
 
         // Assert - Check expiry and trial fields
         $this->assertTrue($enrollment->expired);
@@ -134,7 +140,7 @@ class EnrollmentServiceTest extends TestCase
         ]);
 
         // Act
-        $enrollment = $this->service->enrollments->get(800);
+        $enrollment = $this->service->enrollments->get(new ReadEnrollment(enrollment_id: 800, user_id: null, course_id: null));
 
         // Assert - Check user and course relationship fields
         $this->assertEquals(123, $enrollment->user_id);
@@ -142,6 +148,120 @@ class EnrollmentServiceTest extends TestCase
         $this->assertEquals('Test User', $enrollment->user_name);
         $this->assertEquals(456, $enrollment->course_id);
         $this->assertEquals('Advanced PHP Course', $enrollment->course_name);
+    }
+
+    public function test_can_create_enrollment(): void
+    {
+        $enrollmentData = $this->mockEnrollmentData(['id' => 900, 'user_id' => 1, 'course_id' => 1]);
+
+        $this->mockGlobalRequests([
+            Create::class => MockResponse::make($enrollmentData, 201),
+        ]);
+
+        $enrollment = $this->service->enrollments->create(new CreateEnrollment(
+            user_id: 1,
+            course_id: 1,
+            activated_at: null,
+            expiry_date: null,
+        ));
+
+        $this->assertInstanceOf(Enrollment::class, $enrollment);
+        $this->assertEquals(900, $enrollment->id);
+    }
+
+    public function test_can_update_enrollment(): void
+    {
+        $this->mockGlobalRequests([
+            Update::class => MockResponse::make([], 200),
+        ]);
+
+        $response = $this->service->enrollments->update(new UpdateEnrollment(
+            enrollment_id: 500,
+            activated_at: null,
+            expiry_date: null,
+        ));
+
+        $this->assertTrue($response->successful());
+    }
+
+    public function test_expire_sends_an_update_with_a_past_expiry_date(): void
+    {
+        $this->mockGlobalRequests([
+            Update::class => MockResponse::make([], 200),
+        ]);
+
+        $response = $this->service->enrollments->expire(new DeleteEnrollment(
+            enrollment_id: 500,
+            user_id: null,
+            course_id: null,
+        ));
+
+        $this->assertTrue($response->successful());
+    }
+
+    public function test_enrollments_for_course_filters_by_course_id(): void
+    {
+        $this->mockGlobalRequests([
+            Enrollments::class => MockResponse::make([
+                'items' => [$this->mockEnrollmentData(['id' => 1, 'course_id' => 42])],
+                'meta' => ['pagination' => [
+                    'current_page' => 1, 'next_page' => null, 'prev_page' => 0,
+                    'total_pages' => 1, 'total_items' => 1, 'entries_info' => '1-1 of 1',
+                ]],
+            ], 200),
+        ]);
+
+        $result = iterator_to_array($this->service->enrollments->enrollmentsForCourse(42)->items());
+
+        $this->assertCount(1, $result);
+        $this->assertEquals(42, $result[0]->course_id);
+    }
+
+    public function test_enrollments_for_user_filters_by_email(): void
+    {
+        $this->mockGlobalRequests([
+            Enrollments::class => MockResponse::make([
+                'items' => [$this->mockEnrollmentData(['id' => 1, 'user_email' => 'bob@example.com'])],
+                'meta' => ['pagination' => [
+                    'current_page' => 1, 'next_page' => null, 'prev_page' => 0,
+                    'total_pages' => 1, 'total_items' => 1, 'entries_info' => '1-1 of 1',
+                ]],
+            ], 200),
+        ]);
+
+        $result = iterator_to_array($this->service->enrollments->enrollmentsForUser('bob@example.com')->items());
+
+        $this->assertCount(1, $result);
+    }
+
+    public function test_is_user_enrolled_in_course_returns_true_when_enrollments_exist(): void
+    {
+        $this->mockGlobalRequests([
+            Enrollments::class => MockResponse::make([
+                'items' => [$this->mockEnrollmentData(['id' => 1])],
+                'meta' => ['pagination' => [
+                    'current_page' => 1, 'next_page' => null, 'prev_page' => 0,
+                    'total_pages' => 1, 'total_items' => 1, 'entries_info' => '1-1 of 1',
+                ]],
+            ], 200),
+        ]);
+
+        $this->assertTrue($this->service->enrollments->isUserEnrolledInCourse(1, 42));
+    }
+
+    public function test_is_user_enrolled_in_course_returns_false_when_no_enrollments_exist(): void
+    {
+        $this->mockGlobalRequests([
+            Enrollments::class => MockResponse::make([
+                'items' => [],
+                'meta' => ['pagination' => [
+                    'current_page' => 1, 'next_page' => null, 'prev_page' => 0,
+                    'total_pages' => 1, 'total_items' => 0, 'entries_info' => '0 of 0',
+                ]],
+            ], 200),
+        ]);
+
+        $this->assertFalse($this->service->enrollments->isUserEnrolledInCourse('nobody@example.com', 42));
     }
 
     public function test_enrollment_service_exists(): void
