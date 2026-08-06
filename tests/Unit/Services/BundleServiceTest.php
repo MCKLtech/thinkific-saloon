@@ -30,6 +30,26 @@ class BundleServiceTest extends TestCase
         $this->assertEquals('A Great Bundle', $bundle->name);
     }
 
+    /**
+     * Regression test: Thinkific's real Bundle response has no slug field at
+     * all (verified against the published OpenAPI schema). get() must not
+     * throw when it's absent, and should default it to an empty string
+     * rather than fabricating a value that was never actually returned.
+     */
+    public function test_get_bundle_does_not_throw_when_slug_is_absent(): void
+    {
+        $bundleData = $this->mockBundleData(['id' => 10]);
+        $this->assertArrayNotHasKey('slug', $bundleData);
+
+        $this->mockGlobalRequests([
+            Get::class => MockResponse::make($bundleData, 200),
+        ]);
+
+        $bundle = $this->service->bundles->get(10);
+
+        $this->assertSame('', $bundle->slug);
+    }
+
     public function test_can_list_bundle_courses(): void
     {
         $courses = [

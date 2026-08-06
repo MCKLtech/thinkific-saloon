@@ -245,10 +245,11 @@ abstract class TestCase extends BaseTestCase
      */
     protected function mockBundleData(array $overrides = []): array
     {
+        // No 'slug' key: verified against Thinkific's published OpenAPI
+        // schema that BundleResponse has no slug field at all.
         return array_merge([
             'id' => 1,
             'name' => 'A Bundle',
-            'slug' => 'a-bundle',
             'description' => 'The Bundle description',
             'tagline' => 'Bundle tagline',
             'banner_image_url' => 'http://example.com/image.jpg',
