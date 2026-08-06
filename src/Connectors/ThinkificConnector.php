@@ -325,13 +325,33 @@ class ThinkificConnector extends Connector implements HasPagination
                 return $this->currentResponse->json('meta.pagination.total_pages');
             }
 
+            /**
+             * The v2 API (currently only Webhooks) reports pagination under
+             * meta.page.{has_next,next_page,page_items,total_items} instead
+             * of v1's meta.pagination.{next_page,total_pages,...}. Without
+             * this branch, meta.pagination.next_page is simply missing on a
+             * v2 response, is_null() trivially returns true, and the
+             * paginator silently stops after page 1 even when more pages
+             * exist.
+             */
             protected function isLastPage(Response $response): bool
             {
+                if ($response->json('meta.page') !== null) {
+                    return ($response->json('meta.page.has_next') ?? false) === false;
+                }
+
                 return is_null($response->json('meta.pagination.next_page'));
             }
 
             protected function getTotalPages(Response $response): int
             {
+                if ($response->json('meta.page') !== null) {
+                    $pageItems = $response->json('meta.page.page_items') ?? 0;
+                    $totalItems = $response->json('meta.page.total_items') ?? 0;
+
+                    return $pageItems > 0 ? (int) ceil($totalItems / $pageItems) : 1;
+                }
+
                 return $response->json('meta.pagination.total_pages');
             }
 

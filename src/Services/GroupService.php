@@ -128,13 +128,11 @@ class GroupService extends Resource
             'query[email]' => $email
         ];
 
-        $user = $this->users($group_id, $filter)->collect();
-
-        if($user->isEmpty()) {
-            return false;
+        foreach ($this->users($group_id, $filter)->items() as $user) {
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
