@@ -29,12 +29,14 @@ final class Get extends Request
         return new Bundle(
             id: $responseData['id'],
             name: $responseData['name'],
-            description: $responseData['description'],
-            banner_image_url: $responseData['banner_image_url'],
+            description: $responseData['description'] ?? null,
+            banner_image_url: $responseData['banner_image_url'] ?? '',
             course_ids: $responseData['course_ids'],
-            bundle_card_image_url: $responseData['bundle_card_image_url'],
-            tagline: $responseData['tagline'],
-            slug: $responseData['slug'],
+            bundle_card_image_url: $responseData['bundle_card_image_url'] ?? '',
+            tagline: $responseData['tagline'] ?? null,
+            // Thinkific's Bundle response has no slug field at all (verified
+            // against the published OpenAPI schema) - always empty.
+            slug: $responseData['slug'] ?? '',
         );
     }
 }
