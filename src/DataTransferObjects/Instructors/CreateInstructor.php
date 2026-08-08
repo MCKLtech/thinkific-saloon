@@ -13,7 +13,13 @@ class CreateInstructor
         public ?string $title,
         public ?int $user_id,
         public ?string $bio,
-        public ?string $slug,
+        /**
+         * Required by Thinkific's InstructorRequest schema, unlike every
+         * other field here - omitting it produces a 422 from the real API
+         * rather than a client-side error, so it's non-nullable here to
+         * fail fast instead.
+         */
+        public string $slug,
         public ?string $avatar_url,
     )
     {
