@@ -123,4 +123,20 @@ class CouponServiceTest extends TestCase
 
         $this->assertTrue($response->successful());
     }
+
+    /**
+     * Regression guard: Thinkific's UpdateCoupon schema requires code, even
+     * though every other field is optional. A nullable code lets a caller
+     * construct a request the real API will reject with a 422, so it must
+     * stay a required (non-nullable, no default) constructor argument.
+     */
+    public function test_code_is_required_on_update_coupon_dto(): void
+    {
+        $params = (new \ReflectionClass(UpdateCoupon::class))->getConstructor()->getParameters();
+        $code = current(array_filter($params, fn(\ReflectionParameter $p) => $p->getName() === 'code'));
+
+        $this->assertNotFalse($code, 'UpdateCoupon should have a $code constructor parameter');
+        $this->assertFalse($code->allowsNull(), 'UpdateCoupon::$code should not be nullable');
+        $this->assertFalse($code->isDefaultValueAvailable(), 'UpdateCoupon::$code should not have a default value');
+    }
 }

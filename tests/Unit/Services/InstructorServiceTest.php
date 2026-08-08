@@ -68,7 +68,7 @@ class InstructorServiceTest extends TestCase
             title: null,
             user_id: null,
             bio: null,
-            slug: null,
+            slug: 'new-instructor',
             avatar_url: null,
         ));
 
@@ -92,7 +92,7 @@ class InstructorServiceTest extends TestCase
             title: null,
             user_id: null,
             bio: null,
-            slug: null,
+            slug: 'updated-doe',
             avatar_url: null,
         ));
 
@@ -108,5 +108,24 @@ class InstructorServiceTest extends TestCase
         $response = $this->service->instructors->delete(3);
 
         $this->assertResponseSuccessful($response);
+    }
+
+    /**
+     * Regression guard: Thinkific's InstructorRequest schema requires slug
+     * on both create and update, even though every other field is optional.
+     * A nullable slug lets a caller construct a request the real API will
+     * reject with a 422, so it must stay a required (non-nullable, no
+     * default) constructor argument on both DTOs.
+     */
+    public function test_slug_is_required_on_create_and_update_dtos(): void
+    {
+        foreach ([CreateInstructor::class, UpdateInstructor::class] as $class) {
+            $params = (new \ReflectionClass($class))->getConstructor()->getParameters();
+            $slug = current(array_filter($params, fn(\ReflectionParameter $p) => $p->getName() === 'slug'));
+
+            $this->assertNotFalse($slug, "{$class} should have a \$slug constructor parameter");
+            $this->assertFalse($slug->allowsNull(), "{$class}::\$slug should not be nullable");
+            $this->assertFalse($slug->isDefaultValueAvailable(), "{$class}::\$slug should not have a default value");
+        }
     }
 }
