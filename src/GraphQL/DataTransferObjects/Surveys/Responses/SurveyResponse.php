@@ -10,7 +10,7 @@ final class SurveyResponse
     public function __construct(
         public int    $id,
         public Carbon $created_at,
-        public Carbon $completed_at,
+        public ?Carbon $completed_at,
         /** @var UserAnswer[] $choices */
         public array  $userAnswers,
         public int    $survey_id,

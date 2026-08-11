@@ -59,7 +59,7 @@ final class Create extends Request implements HasBody
             first_name: $instructor['first_name'],
             last_name: $instructor['last_name'],
             bio: $instructor['bio'],
-            slug: $instructor['slug'],
+            slug: $instructor['slug'] ?? '',
             avatar_url: $instructor['avatar_url'],
             email: $instructor['email'],
             created_at: Carbon::parse($instructor['created_at']),

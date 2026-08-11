@@ -44,9 +44,9 @@ final class Assignments extends Request implements HasBody, HasRequestPagination
         return array_map(fn($submission) => new Submission(
             id: $submission['node']['id'],
             status: $submission['node']['status'],
-            name: $submission['node']['file']['name'],
-            type: $submission['node']['file']['type'],
-            url: $submission['node']['file']['url'],
+            name: $submission['node']['file']['name'] ?? null,
+            type: $submission['node']['file']['type'] ?? null,
+            url: $submission['node']['file']['url'] ?? null,
             lesson_id: $submission['node']['assignment']['lesson']['id'],
             lesson_name: $submission['node']['assignment']['lesson']['title'],
             chapter_id: $submission['node']['assignment']['lesson']['chapter']['id'],

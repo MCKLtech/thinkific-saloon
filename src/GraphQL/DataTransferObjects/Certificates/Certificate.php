@@ -11,9 +11,9 @@ final readonly class Certificate
 {
     public function __construct(
         public string $id,
-        public string $credential_id,
+        public ?string $credential_id,
         public string $pdf_download_path,
-        public Carbon $issued_at,
+        public ?Carbon $issued_at,
         public ?Carbon $expiry_date,
         public ?User $user = null,
         public ?Course $course = null,

@@ -68,7 +68,7 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
             id: $certificate['id'],
             credential_id: $certificate['credentialId'],
             pdf_download_path: $certificate['pdfDownloadPath'],
-            issued_at: Carbon::parse($certificate['issuedAt']),
+            issued_at: !empty($certificate['issuedAt']) ? Carbon::parse($certificate['issuedAt']) : null,
             expiry_date: isset($certificate['expiryDate']) ? Carbon::parse($certificate['expiryDate']) : null,
             user: new User(
                 id: $certificate['user']['id'],

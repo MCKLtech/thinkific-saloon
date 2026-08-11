@@ -8,7 +8,7 @@ final readonly class Product
         public string $id,
         public string $productable_id,
         public string $status,
-        public string $slug,
+        public ?string $slug,
         public string $name,
         public ?string $productable_type = null,
         public bool $hasCertificates = false,

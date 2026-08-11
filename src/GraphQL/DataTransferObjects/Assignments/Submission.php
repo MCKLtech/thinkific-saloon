@@ -9,10 +9,10 @@ final class Submission
 {
     public function __construct(
         public int     $id,
-        public string  $status,
-        public string  $name,
-        public string  $type,
-        public string  $url,
+        public ?string $status,
+        public ?string $name,
+        public ?string $type,
+        public ?string $url,
         public int     $lesson_id,
         public string  $lesson_name,
         public int     $chapter_id,

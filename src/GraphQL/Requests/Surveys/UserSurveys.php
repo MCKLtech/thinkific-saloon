@@ -47,7 +47,7 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
         return array_map(fn($survey) => new SurveyResponse(
             id: $survey['id'],
             created_at: Carbon::parse($survey['createdAt']),
-            completed_at: Carbon::parse($survey['completedAt']),
+            completed_at: !empty($survey['completedAt']) ? Carbon::parse($survey['completedAt']) : null,
             userAnswers: array_map(fn($userAnswer) => new UserAnswer(
                 textResponse: $userAnswer['textResponse'],
                 question: new Question(

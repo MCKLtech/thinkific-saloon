@@ -6,9 +6,9 @@ final class Lesson
 {
     public function __construct(
         public int    $id,
-        public string $lessonType,
+        public ?string $lessonType,
         public string $title,
-        public string $takeUrl,
+        public ?string $takeUrl,
         public ?Content $content
     )
     {
