@@ -526,6 +526,65 @@
       },
       {
         "kind": "OBJECT",
+        "name": "AssignmentSubmissionCounts",
+        "description": "Aggregate counts of Assignment submissions for the Site, split by review state",
+        "fields": [
+          {
+            "name": "pending",
+            "description": "Count of submissions awaiting review",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "reviewed",
+            "description": "Count of submissions that have been approved or rejected",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "total",
+            "description": "Total submissions matching the filter (any status)",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "AssignmentSubmissionEdge",
         "description": "An edge in a connection.",
         "fields": [
@@ -647,6 +706,12 @@
             "description": "Submission's status already has been set.",
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "UPDATE_FAILED",
+            "description": "Submission's status could not be updated.",
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -694,12 +759,30 @@
             "defaultValue": null
           },
           {
-            "name": "status",
-            "description": "Filter by submission status",
+            "name": "search",
+            "description": "Free-text search across learner name, assignment title, and course name",
             "type": {
-              "kind": "ENUM",
-              "name": "AssignmentSubmissionStatus",
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "statuses",
+            "description": "Filter by submission statuses (OR logic)",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "AssignmentSubmissionStatus",
+                  "ofType": null
+                }
+              }
             },
             "defaultValue": null
           },
@@ -773,6 +856,30 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          {
+            "name": "CHAPTER_NAME",
+            "description": "Order by the resolved chapter name",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COURSE_NAME",
+            "description": "Order by the resolved course name",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "CREATED_AT",
+            "description": "Order by the submission created date",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "LESSON_NAME",
+            "description": "Order by the resolved lesson name",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "REVIEWED_AT",
             "description": "Order by reviewed at date",
@@ -2270,6 +2377,22 @@
             "deprecationReason": null
           },
           {
+            "name": "enforcedOrder",
+            "description": "Whether items in the Bundle must be completed in order",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "id",
             "description": "The unique Bundle Id",
             "args": [],
@@ -2513,6 +2636,26 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "enforcedOrder",
+            "description": "Filter by whether items in the Bundle must be completed in order",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "enrolledBundlesOnly",
+            "description": "By default, all bundles are returned. If this filter is applied, only bundles\nin which the current user is enrolled will be included in the result set.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
             "name": "excludeEmptyBundles",
             "description": "By default, all bundles are returned. This filter is used to return only bundles with published and visible product items",
             "type": {
@@ -2543,6 +2686,34 @@
               "kind": "INPUT_OBJECT",
               "name": "BundleItemFilter",
               "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "name",
+            "description": "Filter bundles by name (case-insensitive, partial match)",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "publicationStatus",
+            "description": "Filter by the publication status of the Bundle's product",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "ENUM",
+                  "name": "ProductStatus",
+                  "ofType": null
+                }
+              }
             },
             "defaultValue": null
           }
@@ -2629,6 +2800,80 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "BuyerRole",
+        "description": "Role the buyer takes on for the resulting cart's purchase",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "AUTO",
+            "description": "Buyer is treated as a seat manager for items with quantity > 1. Default.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SEAT_MANAGER",
+            "description": "Buyer is treated as a seat manager for every item in the cart, regardless of quantity.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "CartItemInput",
+        "description": "A line item in the cart. Supply either `priceId` or `priceData`, not both.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "priceData",
+            "description": "Inline price definition. If `lookupKey` is set, an existing price with that\nkey is returned instead of creating a new one. Mutually exclusive with `priceId`.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProductPriceCreateInput",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "priceId",
+            "description": "ID of an existing price. Mutually exclusive with `priceData`.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "productId",
+            "description": "Required when supplying `priceData`. Ignored when supplying `priceId` (the product is derived from the price).",
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "quantity",
+            "description": "Number of units. Defaults to 1.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": "1"
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "Category",
         "description": "Represents information about a Category",
@@ -2661,6 +2906,18 @@
                 "name": "Boolean",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": "A short learner-facing description of what the Category contains",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -3460,8 +3717,38 @@
             "deprecationReason": null
           },
           {
+            "name": "COMMUNITY_ARCHIVE_ERROR",
+            "description": "We couldn't archive this community",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "COMMUNITY_CREATION_ERROR",
             "description": "Community could not be created",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COMMUNITY_DELETE_ERROR",
+            "description": "We couldn't delete this community",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COMMUNITY_NOT_FOUND",
+            "description": "We couldn't find this community",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COMMUNITY_PURCHASE_ACCESS_DELETE_FORBIDDEN",
+            "description": "You can't delete a community with sales. Archive it instead.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COMMUNITY_UNARCHIVE_ERROR",
+            "description": "We couldn't unarchive this community",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3474,6 +3761,18 @@
           {
             "name": "FEATURE_LOOKUP_FAILED",
             "description": "Unable to determine tenant plan features",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "LESSON_MENTIONS_NOT_ALLOWED",
+            "description": "Mentions are not allowed on lesson discussions",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "LESSON_NOT_FOUND",
+            "description": "This lesson could not be found for this space's connected course",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3546,6 +3845,12 @@
           {
             "name": "POST_REACTION_ERROR",
             "description": "Could not react to post or reply",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "POST_SCHEDULING_NOT_AVAILABLE",
+            "description": "Post scheduling is not enabled for this site",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3628,6 +3933,18 @@
             "deprecationReason": null
           },
           {
+            "name": "SCHEDULED_AT_IN_PAST",
+            "description": "Please choose a time in the future",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SCHEDULED_AT_TOO_FAR",
+            "description": "Please choose a time within the next 4 months",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SPACE_CREATION_ERROR",
             "description": "Space could not be created",
             "isDeprecated": false,
@@ -3678,6 +3995,16 @@
         "description": "Filters for the Site's communities list",
         "fields": null,
         "inputFields": [
+          {
+            "name": "archived",
+            "description": "When true, returns only archived communities (admins only)",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
           {
             "name": "canModerate",
             "description": "When true, return only communities the current user can moderate",
@@ -5171,6 +5498,30 @@
             "deprecationReason": null
           },
           {
+            "name": "completionCriterion",
+            "description": "How this SCORM course is marked complete (null = default \"completed\")",
+            "args": [],
+            "type": {
+              "kind": "ENUM",
+              "name": "ScormCompletionCriterion",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "completionMinScore",
+            "description": "Minimum score (0-100) required when the completion criterion is score-based",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "package",
             "description": "A Scorm uploaded package",
             "args": [],
@@ -5455,6 +5806,16 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "Float",
+        "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -5848,8 +6209,36 @@
             "defaultValue": null
           },
           {
+            "name": "ids",
+            "description": "Search by course ids",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null
+          },
+          {
             "name": "includeScormCourses",
             "description": "By default, all non-scorm course products are returned. If filter is applied,\nproducts the current user is enrolled in will be excluded from the result set.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "isArchived",
+            "description": "Filter by product archived status",
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
@@ -6218,16 +6607,6 @@
         ],
         "inputFields": null,
         "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
-        "name": "Float",
-        "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -7148,6 +7527,12 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "BULK_ENROLLMENT",
+            "description": "Bulk enrollment",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "BUNDLES",
             "description": "Product bundles",
             "isDeprecated": false,
@@ -7190,8 +7575,20 @@
             "deprecationReason": null
           },
           {
+            "name": "CUSTOM_NAVIGATION_PAGES",
+            "description": "Custom Navigation Pages",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "CUSTOM_ROLES",
             "description": "Custom roles",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "CUSTOM_WIDGETS",
+            "description": "Custom Widgets",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7250,6 +7647,18 @@
             "deprecationReason": null
           },
           {
+            "name": "GROUP_BASED_LEARNING",
+            "description": "Group based learning",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "GROUP_CUSTOM_CATALOG",
+            "description": "Group Catalog",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "GROUP_ORDERS",
             "description": "Group orders",
             "isDeprecated": false,
@@ -7270,6 +7679,12 @@
           {
             "name": "INVOICES",
             "description": "Invoices",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "LEARNING_PATHS",
+            "description": "Learning Paths",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7310,14 +7725,38 @@
             "deprecationReason": null
           },
           {
+            "name": "QUIZ_QUESTION_BANK",
+            "description": "Quiz question bank",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "SITE_ADMINS",
             "description": "Site admins",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
+            "name": "STUDENT_CERTIFICATION",
+            "description": "Thinkific Certification",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "TEAM_MEMBER_LICENSES",
+            "description": "Team member licenses",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "THINKER",
             "description": "Thinker",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "USER_BULK_EMAIL",
+            "description": "Bulk email",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -7667,6 +8106,144 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "GenerateCartUrlInput",
+        "description": "Autogenerated input type of GenerateCartUrl",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "buyerRole",
+            "description": "Role the buyer takes on for the resulting cart's purchase. Defaults to AUTO (seat manager for items with quantity > 1).",
+            "type": {
+              "kind": "ENUM",
+              "name": "BuyerRole",
+              "ofType": null
+            },
+            "defaultValue": "AUTO"
+          },
+          {
+            "name": "clientMutationId",
+            "description": "A unique identifier for the client performing the mutation.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "clientReferenceId",
+            "description": "Optional tenant-supplied identifier preserved through the cart lifecycle.\nSurfaces on the `order.created` and `order_transaction.succeeded` webhook\npayloads so the resulting order can be correlated with your own system.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "couponCode",
+            "description": "Optional coupon code to pre-apply to the cart. Applied best-effort when the\nbuyer opens the returned URL; a code that is invalid or does not apply to the\ncart is silently ignored.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "items",
+            "description": "Items to include in the cart. Each item must supply either `priceId` or `priceData`, not both.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "CartItemInput",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "taxLocation",
+            "description": "The location where the service is delivered or the event takes place. Used to\ndetermine the applicable tax jurisdiction at checkout.",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "PhysicalAddressInput",
+              "ofType": null
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "GenerateCartUrlPayload",
+        "description": "Autogenerated return type of GenerateCartUrl.",
+        "fields": [
+          {
+            "name": "clientMutationId",
+            "description": "A unique identifier for the client performing the mutation.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "url",
+            "description": "Absolute URL to the pre-filled checkout cart, ready to use as a redirect target.",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "userErrors",
+            "description": "Errors on the input of a mutation",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "UserError",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "Group",
         "description": "Represents information about a Group",
@@ -7830,6 +8407,22 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "totalCount",
+            "description": "Total number of groups in the connection, ignoring pagination",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -7877,6 +8470,101 @@
         "possibleTypes": null
       },
       {
+        "kind": "INPUT_OBJECT",
+        "name": "GroupFilterInput",
+        "description": "Possible fields to filter groups",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "hasProducts",
+            "description": "When true, only groups with linked products are returned. When false, only groups without linked products.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "name",
+            "description": "Filter to groups whose name contains this value (case-insensitive, partial match).",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "GroupOrderByInput",
+        "description": "Ordering options for groups",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "direction",
+            "description": "Sort direction",
+            "type": {
+              "kind": "ENUM",
+              "name": "OrderDirection",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "field",
+            "description": "Field to sort on",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "GroupOrderField",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "GroupOrderField",
+        "description": "Possible fields to order groups",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "CREATED_AT",
+            "description": "Order groups by creation date",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "HAS_PRODUCTS",
+            "description": "Order groups by whether they have linked products. Use DESC to list groups with linked products first.",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "NAME",
+            "description": "Order groups by name",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "SCALAR",
         "name": "HexColor",
         "description": "A valid color code, transported as a string",
@@ -7890,6 +8578,16 @@
         "kind": "SCALAR",
         "name": "HTML",
         "description": "Represents valid HTML",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "HTMLDocument",
+        "description": "Represents a valid HTML5 markup",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
@@ -7988,6 +8686,22 @@
             "deprecationReason": null
           },
           {
+            "name": "canDelete",
+            "description": "True when the instructor has no associated courses and can be deleted",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "createdAt",
             "description": "The date when the instructor was created",
             "args": [],
@@ -8051,6 +8765,18 @@
                 "name": "ID",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "instructorId",
+            "description": "The numeric Id of the instructor",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -9488,6 +10214,33 @@
             "deprecationReason": null
           },
           {
+            "name": "generateCartUrl",
+            "description": "Resolves prices for the requested items and returns a checkout cart URL. Each\nitem must reference an existing price via `priceId` or describe one inline via\n`priceData`. Use `lookupKey` inside `priceData` to make price creation\nidempotent — the same key always resolves to the same price, so you do not\nneed to store Thinkific price IDs on your end.",
+            "args": [
+              {
+                "name": "input",
+                "description": "Parameters for GenerateCartUrl",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "GenerateCartUrlInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "GenerateCartUrlPayload",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "markLessonIncomplete",
             "description": "Marks a lesson as incomplete, if it is currently available to the user. If the\nlesson is blocked by a prerequisite or if the lesson is part of a drip\nschedule and it has not yet been released, the lesson cannot be marked as incomplete.",
             "args": [
@@ -9613,18 +10366,8 @@
       },
       {
         "kind": "SCALAR",
-        "name": "NonNegativeFloat",
-        "description": "Represents signed double-precision fractional values that are greater than 0.",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
         "name": "NonNegativeInt",
-        "description": "Scalar representing a non-negative integer.",
+        "description": "Represents non-fractional signed whole numeric values with a value of 0 or more",
         "fields": null,
         "inputFields": null,
         "interfaces": null,
@@ -9999,6 +10742,93 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "PhysicalAddressInput",
+        "description": "A physical address used to determine the applicable tax jurisdiction.",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "city",
+            "description": "City, town, or village.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "country",
+            "description": "ISO 3166-1 alpha-2 country code (e.g. \"US\", \"JP\").",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "line1",
+            "description": "Street address or P.O. box.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "line2",
+            "description": "Apartment, suite, floor, etc.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "postalCode",
+            "description": "ZIP or postal code.",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "state",
+            "description": "State, province, or region code (e.g. \"CA\", \"ON\").",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -10734,6 +11564,12 @@
             "deprecationReason": null
           },
           {
+            "name": "PUBLISHED_AT",
+            "description": "Order posts by published_at",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "REPLY_COUNT",
             "description": "Order posts by reply_count",
             "isDeprecated": false,
@@ -11068,12 +11904,44 @@
           },
           {
             "name": "item",
-            "description": "The item can be a course or a bundle",
+            "description": "The content record this Product is built around",
             "args": [],
             "type": {
               "kind": "INTERFACE",
               "name": "ProductItemInterface",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "itemId",
+            "description": "The id of the Product's item",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "itemType",
+            "description": "The type of the Product's item",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ProductItemType",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -11118,6 +11986,18 @@
                 "name": "String",
                 "ofType": null
               }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "position",
+            "description": "The position of the Product in the manual sort order",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -11179,8 +12059,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use `itemId` instead."
           },
           {
             "name": "productableType",
@@ -11195,8 +12075,8 @@
                 "ofType": null
               }
             },
-            "isDeprecated": false,
-            "deprecationReason": null
+            "isDeprecated": true,
+            "deprecationReason": "Use `itemType` instead."
           },
           {
             "name": "publishedAt",
@@ -11269,6 +12149,37 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "ProductByInput",
+        "description": "Look up a Product by exactly one of the provided keys (@oneOf)",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "The Product's own id",
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "item",
+            "description": "A reference to the content record the Product is built around",
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "ProductItemRefInput",
+              "ofType": null
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -11461,6 +12372,24 @@
             "defaultValue": null
           },
           {
+            "name": "groupIds",
+            "description": "Scope results to products linked to these groups. If none of the supplied\ngroups have linked products, no constraint is applied (all products are returned).",
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null
+          },
+          {
             "name": "hidden",
             "description": "Search by hidden products. Filter is not available for students and unauthenticated users.",
             "type": {
@@ -11601,6 +12530,16 @@
               }
             },
             "defaultValue": null
+          },
+          {
+            "name": "withinUserGroups",
+            "description": "When true, scopes results to products linked to the current user's most\nrecently joined group. Falls back to all products if the latest group has no\nlinked products or the user belongs to no groups.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Boolean",
+              "ofType": null
+            },
+            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -11610,7 +12549,7 @@
       {
         "kind": "INTERFACE",
         "name": "ProductItemInterface",
-        "description": "A common interface for productable types",
+        "description": "A common interface for the content types that a Product can be built around — such as a Course or Community",
         "fields": [
           {
             "name": "cardImage",
@@ -11688,6 +12627,11 @@
           {
             "kind": "OBJECT",
             "name": "LiveEvent",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Thinker",
             "ofType": null
           }
         ]
@@ -11792,10 +12736,106 @@
       },
       {
         "kind": "INPUT_OBJECT",
+        "name": "ProductItemRefInput",
+        "description": "A reference to the content record a Product is built around",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": "The id of the Product's item",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "type",
+            "description": "The type of the Product's item",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "ENUM",
+                "name": "ProductItemType",
+                "ofType": null
+              }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "ProductItemType",
+        "description": "The type of content record a Product can be built around",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "BUNDLE",
+            "description": "The item is a bundle",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COMMUNITY",
+            "description": "The item is a community",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COURSE",
+            "description": "The item is a course",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "DIGITAL_DOWNLOAD",
+            "description": "The item is a digital download",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "LIVE_EVENT",
+            "description": "The item is a live event",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "THINKER",
+            "description": "The item is a Thinker",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
         "name": "ProductOrderBy",
         "description": "Possible fields to order products by",
         "fields": null,
         "inputFields": [
+          {
+            "name": "catalogGroupId",
+            "description": "Required when field is IN_GROUP_CATALOG",
+            "type": {
+              "kind": "SCALAR",
+              "name": "ID",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
           {
             "name": "direction",
             "description": null,
@@ -11838,8 +12878,32 @@
         "interfaces": null,
         "enumValues": [
           {
+            "name": "CATEGORY_NAME",
+            "description": "Order products by their earliest category name (alphabetically)",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "CREATED_AT",
             "description": "Order products by created_at",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "IN_GROUP_CATALOG",
+            "description": "Order products by whether they're in the given group's custom catalog — requires catalogGroupId on ProductOrderBy",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "NAME",
+            "description": "Order products by name",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "POSITION",
+            "description": "Order products by position",
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -11899,7 +12963,7 @@
           },
           {
             "name": "daysUntilExpiry",
-            "description": "Days until the price expires, starting from when the enrollment was started",
+            "description": "Days until enrollment expires after the countdown start (enrollment or course start, per expiry_starts_on)",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -11912,6 +12976,18 @@
           {
             "name": "displayPrice",
             "description": "The formatted price for the ProductPrice",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "expiryStartsOn",
+            "description": "When the enrollment expiry countdown starts: enrollment or course_start",
             "args": [],
             "type": {
               "kind": "SCALAR",
@@ -12027,6 +13103,147 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "ProductPriceCreateInput",
+        "description": "Attributes for creating a product price via the public API. Money fields are\nexpressed in the subunit of the product currency (e.g. 4999 for $49.99 USD).",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "amount",
+            "description": "The price amount expressed in the subunit of the product currency",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "customFirstAmount",
+            "description": "For subscriptions, the first payment amount expressed in the subunit of the product currency",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "daysUntilExpiry",
+            "description": "The number of days until the enrollment expires",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "expiryStartsOn",
+            "description": "When the enrollment expiry countdown starts: enrollment or course_start",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "interval",
+            "description": "Used for subscription and monthly (payment-plan) price. Values are day, week, month, and year",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "intervalCount",
+            "description": "Number for the interval",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "label",
+            "description": "The name for the price",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "lookupKey",
+            "description": "A store-scoped key for idempotent price resolution. On the first call a price\nis created and associated with this key; subsequent calls return the existing\nprice instead of creating a duplicate.",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "numberOfPayments",
+            "description": "Number of months for the payment-plan payment type",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "payButtonText",
+            "description": "The text displayed on the Buy Button on the course card and the course landing page",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "trialInterval",
+            "description": "Used for subscription price, values are day and month",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "trialIntervalCount",
+            "description": "Number for the trialInterval",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "type",
+            "description": "The price payment type",
+            "type": {
+              "kind": "ENUM",
+              "name": "ProductPriceType",
+              "ofType": null
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -12149,31 +13366,37 @@
         "enumValues": [
           {
             "name": "BUNDLE",
-            "description": "The product is a bundle",
+            "description": "The item is a bundle",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "COMMUNITY",
-            "description": "The product is a community",
+            "description": "The item is a community",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "COURSE",
-            "description": "The product is a course",
+            "description": "The item is a course",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "DIGITAL_DOWNLOAD",
-            "description": "The product is digital download",
+            "description": "The item is a digital download",
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "LIVE_EVENT",
-            "description": "The product is a live event",
+            "description": "The item is a live event",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "THINKER",
+            "description": "The item is a Thinker",
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -12535,19 +13758,15 @@
           },
           {
             "name": "product",
-            "description": "Returns a Product by Id",
+            "description": "Returns a Product by its id or by a reference to its item",
             "args": [
               {
-                "name": "id",
-                "description": "The unique Id of the Product to return",
+                "name": "by",
+                "description": "Look up the Product by exactly one key (its id or a reference to its item)",
                 "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "ID",
-                    "ofType": null
-                  }
+                  "kind": "INPUT_OBJECT",
+                  "name": "ProductByInput",
+                  "ofType": null
                 },
                 "defaultValue": null
               }
@@ -14744,6 +15963,47 @@
         "possibleTypes": null
       },
       {
+        "kind": "ENUM",
+        "name": "ScormCompletionCriterion",
+        "description": "How a SCORM course is marked complete",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "COMPLETED",
+            "description": "Complete when: completed",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COMPLETED_AND_PASSED",
+            "description": "Complete when: completed and passed",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "COMPLETED_AND_SCORE",
+            "description": "Complete when: completed and score",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "PASSED",
+            "description": "Complete when: passed",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "SCORE",
+            "description": "Complete when: score",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "possibleTypes": null
+      },
+      {
         "kind": "OBJECT",
         "name": "ScormCorrectResponse",
         "description": "SCORM interaction correct response",
@@ -15235,6 +16495,33 @@
             "deprecationReason": null
           },
           {
+            "name": "assignmentSubmissionCounts",
+            "description": "Aggregate counts of the Site's Assignment submissions, split by review state.\nMirrors assignmentSubmissions filters (status ignored).",
+            "args": [
+              {
+                "name": "filter",
+                "description": "Assignment submission filter (status/statuses are ignored — the counts split on them)",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "AssignmentSubmissionFilter",
+                  "ofType": null
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "AssignmentSubmissionCounts",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "assignmentSubmissions",
             "description": "A list of the Site's Assignment submissions",
             "args": [
@@ -15577,6 +16864,16 @@
                 "defaultValue": null
               },
               {
+                "name": "filter",
+                "description": "Filter the returned groups",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "GroupFilterInput",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "first",
                 "description": "Returns the first _n_ elements from the list.",
                 "type": {
@@ -15592,6 +16889,16 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "orderBy",
+                "description": "Sort order for the returned groups",
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "GroupOrderByInput",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -16143,6 +17450,22 @@
         "name": "SiteSettings",
         "description": "Site Settings",
         "fields": [
+          {
+            "name": "id",
+            "description": "A stable identifier for the Site's settings. Shares the Site's global id.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "ID",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "language",
             "description": "The site-wide language used for all user-facing pages. Set by the Site Owner\nand defaults to English. Can be overridden by a user's preferences, though\nthis field does not return any particular user's language override.",
@@ -16923,6 +18246,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Int",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "submittedResponse",
+            "description": "Whether the current user has submitted a response to this survey or any of its published versions",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Boolean",
                 "ofType": null
               }
             },
@@ -18318,6 +19657,71 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Thinker",
+        "description": "A Thinker",
+        "fields": [
+          {
+            "name": "cardImage",
+            "description": "The image of the item",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Image",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": "The name of the Item",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "slug",
+            "description": "The unique slug used to construct the item's URL",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "ProductItemInterface",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
         "possibleTypes": null
       },
       {
@@ -20224,6 +21628,16 @@
             "ofType": null
           }
         ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "ValidatedDateTime",
+        "description": "ISO8601-encoded date and time string. Input values must include an explicit UTC\noffset (e.g. \"2026-07-09T14:24:00Z\" or \"2026-07-09T14:24:00-07:00\").",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
