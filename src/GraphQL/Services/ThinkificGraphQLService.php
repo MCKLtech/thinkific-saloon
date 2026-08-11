@@ -7,6 +7,7 @@ use WooNinja\LMSContracts\Contracts\LMSServiceInterface;
 use WooNinja\ThinkificSaloon\GraphQL\Auth\ThinkificAuthenticator;
 use WooNinja\ThinkificSaloon\GraphQL\Connectors\ThinkificConnector;
 use WooNinja\ThinkificSaloon\GraphQL\Interfaces\Thinkific;
+use WooNinja\ThinkificSaloon\GraphQL\Requests\Users\Me;
 
 
 final class ThinkificGraphQLService implements Thinkific, LMSServiceInterface
@@ -115,10 +116,10 @@ final class ThinkificGraphQLService implements Thinkific, LMSServiceInterface
     public function isConnected(): bool
     {
         try {
-            // Test connection with a lightweight API call - we'll create a simple health check request
-            $this->connector();
-            return true;
-        } catch (\Exception $e) {
+            return $this->connector()
+                ->send(new Me())
+                ->dtoOrFail();
+        } catch (\Throwable $e) {
             return false;
         }
     }

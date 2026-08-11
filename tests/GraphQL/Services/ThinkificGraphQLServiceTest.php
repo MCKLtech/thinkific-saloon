@@ -9,6 +9,7 @@ use WooNinja\ThinkificSaloon\GraphQL\Services\CertificateService;
 use WooNinja\ThinkificSaloon\GraphQL\Services\CourseService;
 use WooNinja\ThinkificSaloon\GraphQL\Services\GroupService;
 use WooNinja\ThinkificSaloon\GraphQL\Services\ProductService;
+use WooNinja\ThinkificSaloon\GraphQL\Requests\Users\Me;
 use WooNinja\ThinkificSaloon\GraphQL\Services\QuizService;
 use WooNinja\ThinkificSaloon\GraphQL\Services\SurveyService;
 use WooNinja\ThinkificSaloon\GraphQL\Services\ThinkificGraphQLService;
@@ -76,8 +77,30 @@ class ThinkificGraphQLServiceTest extends GraphQLTestCase
         $this->assertSame($customAuth, $this->gql->authenticator());
     }
 
-    public function test_is_connected_returns_true_when_connector_resolves(): void
+    public function test_is_connected_returns_true_when_me_query_succeeds(): void
     {
+        $this->mockGql([
+            Me::class => $this->gqlResponse(['me' => ['id' => '1']]),
+        ]);
+
         $this->assertTrue($this->gql->isConnected());
+    }
+
+    public function test_is_connected_returns_false_when_query_errors(): void
+    {
+        $this->mockGql([
+            Me::class => $this->gqlRateLimited(),
+        ]);
+
+        $this->assertFalse($this->gql->isConnected());
+    }
+
+    public function test_is_connected_returns_false_when_me_is_null(): void
+    {
+        $this->mockGql([
+            Me::class => $this->gqlResponse(['me' => null]),
+        ]);
+
+        $this->assertFalse($this->gql->isConnected());
     }
 }

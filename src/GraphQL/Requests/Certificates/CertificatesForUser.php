@@ -58,7 +58,7 @@ final class CertificatesForUser extends Request implements HasBody, HasRequestPa
 
         return array_map(fn($certificate) => new Certificate(
             id: $certificate['id'],
-            credential_id: $certificate['credentialId'],
+            credential_id: $certificate['issuedId'],
             pdf_download_path: $certificate['pdfDownloadPath'],
             issued_at: !empty($certificate['issuedAt']) ? Carbon::parse($certificate['issuedAt']) : null,
             expiry_date: isset($certificate['expiryDate']) ? Carbon::parse($certificate['expiryDate']) : null,
@@ -71,7 +71,7 @@ final class CertificatesForUser extends Request implements HasBody, HasRequestPa
             ),
             product: new Product(
                 id: $certificate['course']['product']['id'],
-                productable_id: $certificate['course']['product']['productableId'],
+                productable_id: $certificate['course']['product']['itemId'],
                 status: $certificate['course']['product']['status'],
                 slug: $certificate['course']['product']['slug'],
                 name: $certificate['course']['product']['name']
@@ -97,7 +97,7 @@ final class CertificatesForUser extends Request implements HasBody, HasRequestPa
     gid
     certificates(first: $first, after: $after) {
       nodes {
-        credentialId
+        issuedId
         expiryDate
         id
         issuedAt
@@ -109,7 +109,7 @@ final class CertificatesForUser extends Request implements HasBody, HasRequestPa
           name
           product {
             id
-            productableId
+            itemId
             status
             slug
             name

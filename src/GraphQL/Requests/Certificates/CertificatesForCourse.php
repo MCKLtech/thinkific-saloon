@@ -58,7 +58,7 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
 
         $productDto = new Product(
             id: $course['product']['id'],
-            productable_id: $course['product']['productableId'],
+            productable_id: $course['product']['itemId'],
             status: $course['product']['status'],
             slug: $course['product']['slug'],
             name: $course['product']['name']
@@ -66,7 +66,7 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
 
         return array_map(fn($certificate) => new Certificate(
             id: $certificate['id'],
-            credential_id: $certificate['credentialId'],
+            credential_id: $certificate['issuedId'],
             pdf_download_path: $certificate['pdfDownloadPath'],
             issued_at: !empty($certificate['issuedAt']) ? Carbon::parse($certificate['issuedAt']) : null,
             expiry_date: isset($certificate['expiryDate']) ? Carbon::parse($certificate['expiryDate']) : null,
@@ -103,7 +103,7 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
         title
         product {
           id
-          productableId
+          itemId
           status
           slug
           name
@@ -114,7 +114,7 @@ final class CertificatesForCourse extends Request implements HasBody, HasRequest
             id
             pdfDownloadPath
             expiryDate
-            credentialId
+            issuedId
             user {
               id
               gid

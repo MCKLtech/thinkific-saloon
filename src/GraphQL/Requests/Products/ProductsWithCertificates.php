@@ -44,7 +44,7 @@ final class ProductsWithCertificates extends Request implements HasBody, HasRequ
             // Determine if product has certificates
             // Only courses can have certificates (bundles and communities don't)
             $hasCertificates = false;
-            if ($node['productableType'] === 'COURSE' && isset($item['certificates']['totalCount'])) {
+            if ($node['itemType'] === 'COURSE' && isset($item['certificates']['totalCount'])) {
                 $hasCertificates = $item['certificates']['totalCount'] > 0;
             }
             
@@ -54,7 +54,7 @@ final class ProductsWithCertificates extends Request implements HasBody, HasRequ
                 status: $node['status'],
                 slug: $node['slug'],
                 name: $node['name'],
-                productable_type: $node['productableType'],
+                productable_type: $node['itemType'],
                 hasCertificates: $hasCertificates
             );
         }, $edges);
@@ -73,7 +73,7 @@ final class ProductsWithCertificates extends Request implements HasBody, HasRequ
           name
           slug
           status
-          productableType
+          itemType
           item {
             ... on Course {
               id

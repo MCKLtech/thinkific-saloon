@@ -68,7 +68,7 @@ class CertificateServiceTest extends GraphQLTestCase
         $certNode = $this->gqlCertificateNode([
             'course' => array_merge(
                 $this->gqlCourseNode(['id' => '999', 'title' => 'Advanced PHP', 'slug' => 'advanced-php', 'name' => 'advanced-php']),
-                ['product' => $this->gqlProductNode(['id' => 'prod_999', 'productableId' => '999', 'name' => 'Advanced PHP'])]
+                ['product' => $this->gqlProductNode(['id' => 'prod_999', 'itemId' => '999', 'name' => 'Advanced PHP'])]
             ),
         ]);
         $userByEmail = array_merge(

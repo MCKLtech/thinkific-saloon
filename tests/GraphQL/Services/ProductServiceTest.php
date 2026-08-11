@@ -72,13 +72,13 @@ class ProductServiceTest extends GraphQLTestCase
 
     public function test_bundle_product_has_certificates_false_regardless_of_item(): void
     {
-        // Bundles cannot hold certificates — productableType drives the check
+        // Bundles cannot hold certificates — itemType drives the check
         $bundleProduct = [
             'id'             => 'prod_200',
             'name'           => 'Pro Bundle',
             'slug'           => 'pro-bundle',
             'status'         => 'PUBLISHED',
-            'productableType' => 'BUNDLE',
+            'itemType'       => 'BUNDLE',
             'item'           => [],   // fragment won't match Course, so item is empty
         ];
 

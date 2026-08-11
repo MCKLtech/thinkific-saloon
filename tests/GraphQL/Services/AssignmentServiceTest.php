@@ -3,9 +3,13 @@
 namespace WooNinja\ThinkificSaloon\Tests\GraphQL\Services;
 
 use Carbon\Carbon;
+use Saloon\Http\Faking\MockClient;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Assignments\Enums\AssignmentStatus;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Assignments\Submission;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Assignments\UpdateAssignment;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\User;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Assignments\Assignments;
+use WooNinja\ThinkificSaloon\GraphQL\Requests\Assignments\Update;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Users\Assignments as UserAssignments;
 use WooNinja\ThinkificSaloon\Tests\GraphQL\GraphQLTestCase;
 
@@ -215,5 +219,30 @@ class AssignmentServiceTest extends GraphQLTestCase
         }
 
         $this->assertEquals(1, $pages);
+    }
+
+    // -------------------------------------------------------------------------
+    // update() — updateAssignmentSubmissionStatus mutation
+    // -------------------------------------------------------------------------
+
+    public function test_update_sends_the_mutation(): void
+    {
+        $this->mockGql([
+            Update::class => $this->gqlResponse([
+                'updateAssignmentSubmissionStatus' => [
+                    'submission' => [
+                        'id'         => 301,
+                        'status'     => 'APPROVED',
+                        'createdAt'  => '2024-01-14T09:00:00Z',
+                        'updatedAt'  => '2024-02-01T12:00:00Z',
+                        'reviewedAt' => '2024-02-01T12:00:00Z',
+                    ],
+                ],
+            ]),
+        ]);
+
+        $this->gql->assignments->update(new UpdateAssignment(301, AssignmentStatus::APPROVED));
+
+        MockClient::getGlobal()->assertSent(Update::class);
     }
 }

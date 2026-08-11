@@ -6,6 +6,7 @@ namespace WooNinja\ThinkificSaloon\GraphQL\Services;
 use Saloon\PaginationPlugin\Paginator;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Assignments\UpdateAssignment;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Assignments\Assignments;
+use WooNinja\ThinkificSaloon\GraphQL\Requests\Assignments\Update;
 
 
 class AssignmentService extends Resource
@@ -41,7 +42,8 @@ class AssignmentService extends Resource
 
     public function update(UpdateAssignment $updateAssignment): void
     {
-        //TODO
+        $this->connector
+            ->send(new Update($updateAssignment));
     }
 
 

@@ -187,7 +187,7 @@ abstract class GraphQLTestCase extends TestCase
     {
         return array_merge([
             'id'            => 'prod_101',
-            'productableId' => '101',
+            'itemId'        => '101',
             'status'        => 'PUBLISHED',
             'slug'          => 'intro-to-php',
             'name'          => 'Intro to PHP',
@@ -211,7 +211,7 @@ abstract class GraphQLTestCase extends TestCase
     {
         return array_merge([
             'id'              => 'cert_1',
-            'credentialId'    => 'CRED-001',
+            'issuedId'        => 'CRED-001',
             'pdfDownloadPath' => 'https://example.com/cert.pdf',
             'issuedAt'        => '2024-01-15T10:00:00Z',
             'expiryDate'      => '2025-01-15T10:00:00Z',
@@ -230,7 +230,7 @@ abstract class GraphQLTestCase extends TestCase
     {
         return array_merge([
             'id'              => 'cert_1',
-            'credentialId'    => 'CRED-001',
+            'issuedId'        => 'CRED-001',
             'pdfDownloadPath' => 'https://example.com/cert.pdf',
             'issuedAt'        => '2024-01-15T10:00:00Z',
             'expiryDate'      => '2025-01-15T10:00:00Z',
@@ -359,7 +359,7 @@ abstract class GraphQLTestCase extends TestCase
             'name'           => 'Intro to PHP',
             'slug'           => 'intro-to-php',
             'status'         => 'PUBLISHED',
-            'productableType' => 'COURSE',
+            'itemType'       => 'COURSE',
             'item'           => [
                 'id'           => '101',
                 'name'         => 'intro-to-php',
