@@ -130,14 +130,10 @@ class BundleService extends Resource
         }
 
         /**
-         * Avoid Excessive API Calls by limiting to 100
+         * Only the first matching enrollment is needed to confirm existence.
          */
-        $filters['limit'] = 100;
+        $filters['limit'] = 1;
 
-        foreach ($this->enrollments($productable_id, $filters)->items() as $enrollment) {
-            return true;
-        }
-
-        return false;
+        return $this->paginatorHasAnyItems($this->enrollments($productable_id, $filters));
     }
 }

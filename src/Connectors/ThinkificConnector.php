@@ -311,6 +311,10 @@ class ThinkificConnector extends Connector implements HasPagination
              */
             public function getTotalAPIResults(): int
             {
+                if ($this->isV2Pagination($this->currentResponse)) {
+                    return $this->currentResponse->json('meta.page.total_items') ?? 0;
+                }
+
                 return $this->currentResponse->json('meta.pagination.total_items');
             }
 
@@ -322,22 +326,41 @@ class ThinkificConnector extends Connector implements HasPagination
              */
             public function getTotalAPIPages(): int
             {
-                return $this->currentResponse->json('meta.pagination.total_pages');
+                return $this->getTotalPages($this->currentResponse);
             }
 
             /**
              * The v2 API (currently only Webhooks) reports pagination under
              * meta.page.{has_next,next_page,page_items,total_items} instead
-             * of v1's meta.pagination.{next_page,total_pages,...}. Without
-             * this branch, meta.pagination.next_page is simply missing on a
-             * v2 response, is_null() trivially returns true, and the
-             * paginator silently stops after page 1 even when more pages
-             * exist.
+             * of v1's meta.pagination.{next_page,total_pages,...}.
+             */
+            private function isV2Pagination(Response $response): bool
+            {
+                return $response->json('meta.page') !== null;
+            }
+
+            /**
+             * Without this branch, meta.pagination.next_page is simply
+             * missing on a v2 response, is_null() trivially returns true,
+             * and the paginator silently stops after page 1 even when more
+             * pages exist.
              */
             protected function isLastPage(Response $response): bool
             {
-                if ($response->json('meta.page') !== null) {
-                    return ($response->json('meta.page.has_next') ?? false) === false;
+                if ($this->isV2Pagination($response)) {
+                    $hasNext = $response->json('meta.page.has_next');
+
+                    if ($hasNext !== null) {
+                        return $hasNext === false;
+                    }
+
+                    // has_next is unexpectedly absent from an otherwise
+                    // v2-shaped response: infer completion from a short
+                    // page rather than assuming "last page", which would
+                    // silently truncate results.
+                    $pageItems = $response->json('meta.page.page_items') ?? 0;
+
+                    return $pageItems < $this->perPageLimit;
                 }
 
                 return is_null($response->json('meta.pagination.next_page'));
@@ -345,11 +368,17 @@ class ThinkificConnector extends Connector implements HasPagination
 
             protected function getTotalPages(Response $response): int
             {
-                if ($response->json('meta.page') !== null) {
-                    $pageItems = $response->json('meta.page.page_items') ?? 0;
+                if ($this->isV2Pagination($response)) {
                     $totalItems = $response->json('meta.page.total_items') ?? 0;
 
-                    return $pageItems > 0 ? (int) ceil($totalItems / $pageItems) : 1;
+                    // Use the configured per-page limit rather than this
+                    // response's page_items, which reflects only however
+                    // many items happened to be on the currently-fetched
+                    // page (e.g. a partial last page) and would otherwise
+                    // skew the total page count.
+                    $perPage = $this->perPageLimit ?: ($response->json('meta.page.page_items') ?? 0);
+
+                    return $perPage > 0 ? (int) ceil($totalItems / $perPage) : 1;
                 }
 
                 return $response->json('meta.pagination.total_pages');

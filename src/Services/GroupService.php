@@ -128,11 +128,7 @@ class GroupService extends Resource
             'query[email]' => $email
         ];
 
-        foreach ($this->users($group_id, $filter)->items() as $user) {
-            return true;
-        }
-
-        return false;
+        return $this->paginatorHasAnyItems($this->users($group_id, $filter));
     }
 
     /**

@@ -153,11 +153,9 @@ class EnrollmentService extends Resource implements EnrollmentServiceInterface
      */
     public function isUserEnrolledInCourse(int|string $user_id_or_email, int $course_id, array $filters = []): bool
     {
-        foreach ($this->enrollmentsForUserInCourse($user_id_or_email, $course_id, array_merge($filters, ['limit' => 1]))->items() as $enrollment) {
-            return true;
-        }
-
-        return false;
+        return $this->paginatorHasAnyItems(
+            $this->enrollmentsForUserInCourse($user_id_or_email, $course_id, array_merge($filters, ['limit' => 1]))
+        );
     }
 
     /**

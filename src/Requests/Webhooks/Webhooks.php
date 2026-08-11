@@ -31,6 +31,6 @@ final class Webhooks extends Request implements Paginatable
                 updated_by: $webhook['updated_by'],
                 target_url: $webhook['target_url'],
             );
-        }, $response->json('items'));
+        }, $response->json('items') ?? []);
     }
 }
