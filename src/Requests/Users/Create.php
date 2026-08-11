@@ -66,7 +66,7 @@ final class Create extends Request implements HasBody
             last_name: $user['last_name'],
             email: $user['email'],
             password: $user['password'] ?? null,
-            roles: $user['roles'],
+            roles: $user['roles'] ?? [],
             avatar_url: $user['avatar_url'] ?? null,
             bio: $user['bio'] ?? null,
             company: $user['company'] ?? null,

@@ -120,13 +120,9 @@ class BundleService extends Resource
     public function isUserEnrolled(int $productable_id, int|string $user_id_or_email, array $filters = []): bool
     {
         if (is_numeric($user_id_or_email)) {
-            $filters = [
-                'query[user_id]' => $user_id_or_email,
-            ];
+            $filters['query[user_id]'] = $user_id_or_email;
         } else {
-            $filters = [
-                'query[email]' => $user_id_or_email,
-            ];
+            $filters['query[email]'] = $user_id_or_email;
         }
 
         /**

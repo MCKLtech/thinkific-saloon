@@ -19,6 +19,6 @@ final class User
     {
         $fullName = trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
 
-        return !empty($fullName) ? $fullName : $this->email;
+        return !empty($fullName) ? $fullName : ($this->email ?? '');
     }
 }

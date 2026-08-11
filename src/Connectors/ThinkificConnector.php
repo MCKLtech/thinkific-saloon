@@ -357,7 +357,13 @@ class ThinkificConnector extends Connector implements HasPagination
                     // has_next is unexpectedly absent from an otherwise
                     // v2-shaped response: infer completion from a short
                     // page rather than assuming "last page", which would
-                    // silently truncate results.
+                    // silently truncate results. A non-positive limit can't
+                    // produce a "short" page, so treat it as the last page
+                    // rather than looping indefinitely.
+                    if (!is_numeric($this->perPageLimit) || $this->perPageLimit <= 0) {
+                        return true;
+                    }
+
                     $pageItems = $response->json('meta.page.page_items') ?? 0;
 
                     return $pageItems < $this->perPageLimit;

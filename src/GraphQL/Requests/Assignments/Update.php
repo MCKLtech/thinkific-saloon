@@ -13,7 +13,7 @@ final class Update extends Request implements HasBody
 {
     use HasJsonBody;
 
-    protected Method $method = Method::PUT;
+    protected Method $method = Method::POST;
 
     public function __construct(
         private readonly UpdateAssignment $updateAssignment

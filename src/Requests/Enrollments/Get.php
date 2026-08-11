@@ -41,7 +41,7 @@ final class Get extends Request
             started_at: !empty($responseData['started_at']) ? Carbon::parse($responseData['started_at']) : null,
             activated_at: !empty($responseData['activated_at']) ? Carbon::parse($responseData['activated_at']) : null,
             completed_at: !empty($responseData['completed_at']) ? Carbon::parse($responseData['completed_at']) : null,
-            updated_at: !empty($responseData['updated_at']) ? Carbon::parse($responseData['updated_at']) : null,
+            updated_at: Carbon::parse($responseData['updated_at']),
             expiry_date: !empty($responseData['expiry_date']) ? Carbon::parse($responseData['expiry_date']) : null,
             credential_id: null,
             certificate_url: null,

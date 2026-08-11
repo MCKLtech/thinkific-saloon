@@ -3,6 +3,7 @@
 namespace WooNinja\ThinkificSaloon\Tests\GraphQL\Services;
 
 use Carbon\Carbon;
+use Saloon\Enums\Method;
 use Saloon\Http\Faking\MockClient;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Assignments\Enums\AssignmentStatus;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Assignments\Submission;
@@ -243,6 +244,12 @@ class AssignmentServiceTest extends GraphQLTestCase
 
         $this->gql->assignments->update(new UpdateAssignment(301, AssignmentStatus::APPROVED));
 
-        MockClient::getGlobal()->assertSent(Update::class);
+        // Every GraphQL request in this SDK is POST against the single
+        // /stable/graphql endpoint; MockClient matches by request class
+        // regardless of HTTP method, so this must be asserted explicitly
+        // to catch a wrong-method regression (e.g. PUT).
+        MockClient::getGlobal()->assertSent(
+            fn (Update $request) => $request->getMethod() === Method::POST
+        );
     }
 }
