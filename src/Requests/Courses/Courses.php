@@ -30,22 +30,22 @@ final class Courses extends Request implements Paginatable
                 id: $course['id'],
                 name: $course['name'],
                 slug: $course['slug'] ?? '',
-                subtitle: $course['subtitle'],
+                subtitle: $course['subtitle'] ?? null,
                 product_id: $course['product_id'],
-                description: $course['description'],
-                course_card_text: $course['course_card_text'],
-                intro_video_youtube: $course['intro_video_youtube'],
-                contact_information: $course['contact_information'],
-                keywords: $course['keywords'],
-                duration: $course['duration'],
+                description: $course['description'] ?? null,
+                course_card_text: $course['course_card_text'] ?? null,
+                intro_video_youtube: $course['intro_video_youtube'] ?? null,
+                contact_information: $course['contact_information'] ?? null,
+                keywords: $course['keywords'] ?? null,
+                duration: $course['duration'] ?? null,
                 banner_image_url: $course['banner_image_url'] ?? '',
                 course_card_image_url: $course['course_card_image_url'] ?? '',
-                intro_video_wistia_identifier: $course['intro_video_wistia_identifier'],
+                intro_video_wistia_identifier: $course['intro_video_wistia_identifier'] ?? null,
                 administrator_user_ids: $course['administrator_user_ids'] ?? [],
-                chapter_ids: $course['chapter_ids'],
+                chapter_ids: $course['chapter_ids'] ?? [],
                 reviews_enabled: $course['reviews_enabled'],
-                user_id: $course['user_id'],
-                instructor_id: $course['instructor_id']
+                user_id: $course['user_id'] ?? null,
+                instructor_id: $course['instructor_id'] ?? null
             );
         }, $response->json('items'));
     }

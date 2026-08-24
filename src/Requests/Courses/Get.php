@@ -31,22 +31,22 @@ final class Get extends Request
             id: $responseData['id'],
             name: $responseData['name'],
             slug: $responseData['slug'] ?? '',
-            subtitle: $responseData['subtitle'],
+            subtitle: $responseData['subtitle'] ?? null,
             product_id: $responseData['product_id'],
-            description: $responseData['description'],
-            course_card_text: $responseData['course_card_text'],
-            intro_video_youtube: $responseData['intro_video_youtube'],
-            contact_information: $responseData['contact_information'],
-            keywords: $responseData['keywords'],
-            duration: $responseData['duration'],
+            description: $responseData['description'] ?? null,
+            course_card_text: $responseData['course_card_text'] ?? null,
+            intro_video_youtube: $responseData['intro_video_youtube'] ?? null,
+            contact_information: $responseData['contact_information'] ?? null,
+            keywords: $responseData['keywords'] ?? null,
+            duration: $responseData['duration'] ?? null,
             banner_image_url: $responseData['banner_image_url'] ?? '',
             course_card_image_url: $responseData['course_card_image_url'] ?? '',
-            intro_video_wistia_identifier: $responseData['intro_video_wistia_identifier'],
+            intro_video_wistia_identifier: $responseData['intro_video_wistia_identifier'] ?? null,
             administrator_user_ids: $responseData['administrator_user_ids'] ?? [],
-            chapter_ids: $responseData['chapter_ids'],
+            chapter_ids: $responseData['chapter_ids'] ?? [],
             reviews_enabled: $responseData['reviews_enabled'],
-            user_id: $responseData['user_id'],
-            instructor_id: $responseData['instructor_id']
+            user_id: $responseData['user_id'] ?? null,
+            instructor_id: $responseData['instructor_id'] ?? null
         );
     }
 }
