@@ -58,14 +58,14 @@ final class Update extends Request implements HasBody
         return new Promotion(
             id: $responseData['id'],
             name: $responseData['name'],
-            description: $responseData['description'],
+            description: $responseData['description'] ?? null,
             starts_at: Carbon::parse($responseData['starts_at']),
             expires_at: $responseData['expires_at'] ? Carbon::parse($responseData['expires_at']) : null,
             discount_type: $responseData['discount_type'],
             amount: $responseData['amount'],
-            coupon_ids: $responseData['coupon_ids'],
+            coupon_ids: $responseData['coupon_ids'] ?? null,
             product_ids: $responseData['product_ids'] ?? [],
-            duration: $responseData['duration']
+            duration: $responseData['duration'] ?? null
         );
     }
 

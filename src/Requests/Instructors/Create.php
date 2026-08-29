@@ -54,14 +54,14 @@ final class Create extends Request implements HasBody
 
         return new Instructor(
             id: $instructor['id'],
-            user_id: $instructor['user_id'],
-            title: $instructor['title'],
+            user_id: $instructor['user_id'] ?? null,
+            title: $instructor['title'] ?? null,
             first_name: $instructor['first_name'],
             last_name: $instructor['last_name'],
-            bio: $instructor['bio'],
+            bio: $instructor['bio'] ?? null,
             slug: $instructor['slug'] ?? '',
-            avatar_url: $instructor['avatar_url'],
-            email: $instructor['email'],
+            avatar_url: $instructor['avatar_url'] ?? null,
+            email: $instructor['email'] ?? null,
             created_at: Carbon::parse($instructor['created_at']),
         );
     }

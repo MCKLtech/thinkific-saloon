@@ -31,8 +31,8 @@ final class Chapters extends Request implements Paginatable
                 id: $chapter['id'],
                 name: $chapter['name'],
                 position: $chapter['position'],
-                description: $chapter['description'],
-                duration_in_seconds: $chapter['duration_in_seconds'],
+                description: $chapter['description'] ?? null,
+                duration_in_seconds: $chapter['duration_in_seconds'] ?? null,
                 content_ids: $chapter['content_ids'],
             );
         }, $response->json('items'));

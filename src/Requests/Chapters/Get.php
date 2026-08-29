@@ -31,8 +31,8 @@ final class Get extends Request
             id: $responseData['id'],
             name: $responseData['name'],
             position: $responseData['position'],
-            description: $responseData['description'],
-            duration_in_seconds: $responseData['duration_in_seconds'],
+            description: $responseData['description'] ?? null,
+            duration_in_seconds: $responseData['duration_in_seconds'] ?? null,
             content_ids: $responseData['content_ids'],
         );
     }

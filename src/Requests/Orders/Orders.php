@@ -50,9 +50,9 @@ final class Orders extends Request implements Paginatable
                 amount_dollars: $order['amount_dollars'],
                 amount_cents: $order['amount_cents'],
                 subscription: $order['subscription'],
-                coupon_code: $order['coupon_code'],
-                coupon_id: $order['coupon_id'],
-                affiliate_referral_code: $order['affiliate_referral_code'],
+                coupon_code: $order['coupon_code'] ?? null,
+                coupon_id: $order['coupon_id'] ?? null,
+                affiliate_referral_code: $order['affiliate_referral_code'] ?? null,
                 status: $order['status'],
                 items: $order['items']
             );

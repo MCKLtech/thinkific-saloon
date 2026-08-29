@@ -24,14 +24,14 @@ final class Promotions extends Request implements Paginatable
             return new Promotion(
                 id: $promotion['id'],
                 name: $promotion['name'],
-                description: $promotion['description'],
+                description: $promotion['description'] ?? null,
                 starts_at: Carbon::parse($promotion['starts_at']),
                 expires_at: Carbon::parse($promotion['expires_at']),
                 discount_type: $promotion['discount_type'],
                 amount: $promotion['amount'],
-                coupon_ids: $promotion['coupon_ids'],
+                coupon_ids: $promotion['coupon_ids'] ?? null,
                 product_ids: $promotion['product_ids'] ?? [],
-                duration: $promotion['duration']
+                duration: $promotion['duration'] ?? null
             );
         }, $response->json('items'));
     }

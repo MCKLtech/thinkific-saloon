@@ -31,7 +31,7 @@ final class Get extends Request
         return new Coupon(
             id: $coupon['id'],
             code: $coupon['code'],
-            note: $coupon['note'],
+            note: $coupon['note'] ?? null,
             quantity_used: $coupon['quantity_used'],
             quantity: $coupon['quantity'],
             promotion_id: $coupon['promotion_id'],

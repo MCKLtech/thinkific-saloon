@@ -55,7 +55,7 @@ final class Create extends Request implements HasBody
         return new Coupon(
             id: $responseData['id'],
             code: $responseData['code'],
-            note: $responseData['note'],
+            note: $responseData['note'] ?? null,
             quantity_used: $responseData['quantity_used'],
             quantity: $responseData['quantity'],
             promotion_id: $responseData['promotion_id'],

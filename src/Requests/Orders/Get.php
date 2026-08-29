@@ -38,9 +38,9 @@ final class Get extends Request
             amount_dollars: $responseData['amount_dollars'],
             amount_cents: $responseData['amount_cents'],
             subscription: $responseData['subscription'],
-            coupon_code: $responseData['coupon_code'],
-            coupon_id: $responseData['coupon_id'],
-            affiliate_referral_code: $responseData['affiliate_referral_code'],
+            coupon_code: $responseData['coupon_code'] ?? null,
+            coupon_id: $responseData['coupon_id'] ?? null,
+            affiliate_referral_code: $responseData['affiliate_referral_code'] ?? null,
             status: $responseData['status'],
             items: $responseData['items']
         );
