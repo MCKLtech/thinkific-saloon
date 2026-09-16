@@ -37,12 +37,15 @@ class QuizService extends Resource
      * Note $answers_after is applied to every submission in the page, so only
      * the answers of the submission the cursor came from are meaningful.
      *
-     * Cost: nested connections multiply — each request costs roughly
-     * $per_page x $answers_per_page x (choices per answer) against Thinkific's
-     * per-request and per-minute point caps. The default of 10 is deliberately
-     * conservative to stay under the per-request cap; size $answers_per_page to
+     * Cost: Thinkific rejects any single request costing more than 1000 points
+     * (MAX_QUERY_COST_EXCEEDED, returned as HTTP 200 and thrown here as
+     * MaxQueryCostExceededException). Nested connections multiply: this query's
+     * cost scales with $per_page x $answers_per_page, so 10 x 50 is rejected in
+     * production while the 10 x 10 defaults are not. Size $answers_per_page to
      * the quiz's actual question count rather than a blanket large value, and
-     * check hasMoreAnswers on each result to detect truncation.
+     * check hasMoreAnswers on each result to detect truncation. A rejected
+     * query is not charged against the per-minute budget, so retrying with the
+     * same sizes fails identically — shrink the page instead.
      *
      * @param array       $filter
      * @param int         $per_page

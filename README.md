@@ -106,6 +106,39 @@ foreach ($users->items() as $user) {
 }
 ```
 
+### GraphQL errors and the query cost cap
+
+Thinkific's GraphQL API returns system and validation errors as **HTTP 200** with a top-level `errors` array, and
+rate-limits on a **cost** budget rather than a request count: 2000 points per minute, and **no single request may
+cost more than 1000 points**. The connector treats any populated `errors` array as a failed request, so these
+surface as exceptions instead of empty result sets:
+
+| Exception                         | Thinkific code            | Notes                                                                  |
+|-----------------------------------|---------------------------|------------------------------------------------------------------------|
+| `MaxQueryCostExceededException`   | `MAX_QUERY_COST_EXCEEDED` | `getCost()` / `getMaxCost()`. Not charged to the budget; shrink pages. |
+| `GraphQLRateLimitedException`     | `RATE_LIMITED`            | `getResetAt()` / `getSecondsUntilReset()`. Wait, then retry.           |
+| `GraphQLException`                | anything else             | `getErrors()`, `getErrorCodes()`, `getRateLimit()`.                    |
+
+All three extend Saloon's `RequestException` (namespace `WooNinja\ThinkificSaloon\GraphQL\Exceptions`). Nested
+connections multiply cost — e.g. quiz submissions with `answers_per_page: 50` are rejected while the
+`per_page: 10, answers_per_page: 10` defaults are not — so size nested pages to the real question count and use the
+`hasMoreAnswers` / `answersEndCursor` fields to drain overflow.
+
+```php
+use WooNinja\ThinkificSaloon\GraphQL\Exceptions\MaxQueryCostExceededException;
+use WooNinja\ThinkificSaloon\GraphQL\Exceptions\GraphQLRateLimitedException;
+
+try {
+    foreach ($client->quizzes->submissions($filter, per_page: 10, answers_per_page: 10)->items() as $submission) {
+        // ...
+    }
+} catch (MaxQueryCostExceededException $e) {
+    // $e->getCost() > $e->getMaxCost(): reduce per_page / answers_per_page and re-run
+} catch (GraphQLRateLimitedException $e) {
+    // sleep($e->getSecondsUntilReset()) and retry
+}
+```
+
 ## Support, Issues & Bugs
 
 This library is unofficial and is not endorsed or supported by Thinkific.

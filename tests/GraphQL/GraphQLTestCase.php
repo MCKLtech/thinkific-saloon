@@ -6,6 +6,7 @@ use Mockery;
 use PHPUnit\Framework\TestCase;
 use Saloon\Http\Faking\MockClient;
 use Saloon\Http\Faking\MockResponse;
+use Saloon\RateLimitPlugin\Stores\MemoryStore;
 use WooNinja\ThinkificSaloon\GraphQL\Services\ThinkificGraphQLService;
 
 /**
@@ -22,6 +23,9 @@ abstract class GraphQLTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // MemoryStore's backing array is process-static, so rate-limit strikes
+        // recorded by one test would otherwise block requests in the next.
+        MemoryStore::clear();
         $this->gql = new ThinkificGraphQLService('test_oauth_token');
     }
 

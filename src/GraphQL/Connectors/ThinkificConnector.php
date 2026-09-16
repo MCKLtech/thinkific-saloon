@@ -16,6 +16,8 @@ use Saloon\RateLimitPlugin\Traits\HasRateLimits;
 use Saloon\Traits\Plugins\AcceptsJson;
 use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
 use Saloon\Traits\Plugins\HasTimeout;
+use Throwable;
+use WooNinja\ThinkificSaloon\GraphQL\Exceptions\GraphQLException;
 use WooNinja\ThinkificSaloon\GraphQL\Responses\ThinkificGraphQLResponse;
 use WooNinja\ThinkificSaloon\Senders\ProxySender;
 use WooNinja\ThinkificSaloon\Traits\HasProxies;
@@ -216,6 +218,39 @@ class ThinkificConnector extends Connector
         } catch (\JsonException $e) {
             $limit->exceeded(releaseInSeconds: 60);
         }
+    }
+
+    /**
+     * Thinkific returns GraphQL system/validation errors (MAX_QUERY_COST_EXCEEDED,
+     * RATE_LIMITED, BAD_USER_INPUT, FORBIDDEN, SERVER_ERROR, ...) as HTTP 200 with a
+     * top-level `errors` array. Saloon only checks the status code by default, so
+     * without this override such responses hydrate as "no data" and paginated runs
+     * finish "successfully" with zero rows. Treat any populated `errors` array as a
+     * failed request so AlwaysThrowOnErrors and dtoOrFail() throw.
+     *
+     * @see https://support.thinkific.dev/hc/en-us/articles/22166388092823-GraphQL-Error-Handling
+     */
+    public function hasRequestFailed(Response $response): ?bool
+    {
+        if ($response->serverError() || $response->clientError()) {
+            return true;
+        }
+
+        return GraphQLException::extractErrors($response) !== [];
+    }
+
+    /**
+     * Build a typed GraphQLException (or a MaxQueryCostExceeded / RateLimited
+     * subclass) for `errors`-array failures. HTTP-level failures fall through to
+     * Saloon's default exceptions.
+     */
+    public function getRequestException(Response $response, ?Throwable $senderException): ?Throwable
+    {
+        if (GraphQLException::extractErrors($response) === []) {
+            return null;
+        }
+
+        return GraphQLException::fromResponse($response, $senderException);
     }
 
     /**

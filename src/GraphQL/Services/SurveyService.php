@@ -37,6 +37,12 @@ class SurveyService extends Resource
      * Note $answers_after is applied to every response in the page, so only the
      * answers of the response the cursor came from are meaningful.
      *
+     * Cost: as with QuizService::submissions(), cost scales with
+     * $per_page x $user_answers and a single request may not exceed 1000 points;
+     * over that Thinkific returns MAX_QUERY_COST_EXCEEDED (thrown as
+     * MaxQueryCostExceededException). Keep $user_answers near the survey's real
+     * question count and lean on hasMoreAnswers / $answers_after for overflow.
+     *
      * @param int         $user_id
      * @param int         $per_page
      * @param int         $user_answers
