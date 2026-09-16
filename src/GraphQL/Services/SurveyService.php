@@ -11,14 +11,17 @@ class SurveyService extends Resource
     /**
      * Return a list of Surveys
      *
-     * @param int $per_page
-     * @param int $questions_per_page
-     * @param int $choices_per_page
+     * Filter keys: completedAt (DateTimeFilter), courseName
+     *
+     * @param int   $per_page
+     * @param int   $questions_per_page
+     * @param int   $choices_per_page
+     * @param array $filter
      * @return Paginator
      */
-    public function surveys(int $per_page = 25, int $questions_per_page = 50, int $choices_per_page = 25): Paginator
+    public function surveys(int $per_page = 25, int $questions_per_page = 50, int $choices_per_page = 25, array $filter = []): Paginator
     {
-        $surveys = new Surveys($per_page, $questions_per_page, $choices_per_page);
+        $surveys = new Surveys($per_page, $questions_per_page, $choices_per_page, $filter);
 
         return $surveys->paginate($this->connector);
 
@@ -27,14 +30,22 @@ class SurveyService extends Resource
     /**
      * Return a list of Surveys for a given Thinkific User ID
      *
-     * @param int $user_id
-     * @param int $per_page
-     * @param int $user_answers
+     * Each response carries at most $user_answers answers. When a response has
+     * more, its DTO reports hasMoreAnswers = true and answersEndCursor; re-issue
+     * this call with that cursor as $answers_after and pick the matching
+     * SurveyResponse::$id out of the result to get the next page of answers.
+     * Note $answers_after is applied to every response in the page, so only the
+     * answers of the response the cursor came from are meaningful.
+     *
+     * @param int         $user_id
+     * @param int         $per_page
+     * @param int         $user_answers
+     * @param string|null $answers_after  userAnswers cursor from a prior SurveyResponse::$answersEndCursor
      * @return Paginator
      */
-    public function surveysForUser(int $user_id, int $per_page = 10, int $user_answers = 25): Paginator
+    public function surveysForUser(int $user_id, int $per_page = 10, int $user_answers = 25, ?string $answers_after = null): Paginator
     {
-        $userResponses = new UserSurveys($user_id, $per_page, $user_answers);
+        $userResponses = new UserSurveys($user_id, $per_page, $user_answers, $answers_after);
 
         return $userResponses->paginate($this->connector);
 

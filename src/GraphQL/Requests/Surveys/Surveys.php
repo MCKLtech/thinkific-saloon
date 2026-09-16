@@ -27,9 +27,10 @@ final class Surveys extends Request implements HasBody, HasRequestPagination, Pa
     public ?string $after = null;
 
     public function __construct(
-        private readonly int $per_page = 25,
-        private readonly int $questions_per_page = 50,
-        private readonly int $choices_per_page = 25
+        private readonly int   $per_page = 25,
+        private readonly int   $questions_per_page = 50,
+        private readonly int   $choices_per_page = 25,
+        private readonly array $filter = [],
     )
     {
     }
@@ -56,17 +57,19 @@ final class Surveys extends Request implements HasBody, HasRequestPagination, Pa
                     text: $choice['text'],
                     position: $choice['position']
                 ), $question['choices']['nodes'] ?? [])
-            ), $survey['questions']['nodes'] ?? [])
-
+            ), $survey['questions']['nodes'] ?? []),
+            name: $survey['name'] ?? null,
         ), $nodes);
     }
 
     protected function defaultBody(): array
     {
+        $filter = array_filter($this->filter, fn($v) => !is_null($v));
+
         return [
-            'query' => 'query SiteSurveys($first: Int, $after: String, $questionsFirst2: Int, $choicesFirst2: Int) {
+            'query' => 'query SiteSurveys($first: Int, $after: String, $filter: SurveysFilter, $questionsFirst2: Int, $choicesFirst2: Int) {
   site {
-    surveys(first: $first, after: $after) {
+    surveys(first: $first, after: $after, filter: $filter) {
      pageInfo {
         endCursor
         hasNextPage
@@ -76,6 +79,7 @@ final class Surveys extends Request implements HasBody, HasRequestPagination, Pa
       nodes {
         createdAt
         id
+        name
         questions(first: $questionsFirst2) {
           nodes {
             questionType
@@ -98,6 +102,7 @@ final class Surveys extends Request implements HasBody, HasRequestPagination, Pa
             'variables' => [
                 'first' => $this->per_page,
                 'after' => $this->after,
+                'filter' => empty($filter) ? null : $filter,
                 'questionsFirst2' => $this->questions_per_page,
                 'choicesFirst2' => $this->choices_per_page
             ]

@@ -30,7 +30,8 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
     public function __construct(
         private readonly int $user_id,
         private readonly int $per_page = 10,
-        private readonly int $user_answers = 25
+        private readonly int $user_answers = 25,
+        private readonly ?string $answers_after = null,
     )
     {
     }
@@ -67,13 +68,15 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
                 first_name: $survey['user']['firstName'] ?? null,
                 last_name: $survey['user']['lastName'] ?? null
             ),
+            hasMoreAnswers: (bool)($survey['userAnswers']['pageInfo']['hasNextPage'] ?? false),
+            answersEndCursor: $survey['userAnswers']['pageInfo']['endCursor'] ?? null,
         ), $nodes);
     }
 
     protected function defaultBody(): array
     {
         return [
-            'query' => 'query UserSurveySubmissions($first: Int, $after: String, $filter: SurveySubmissionsFilter, $userAnswersFirst2: Int) {
+            'query' => 'query UserSurveySubmissions($first: Int, $after: String, $filter: SurveySubmissionsFilter, $userAnswersFirst2: Int, $answersAfter: String) {
   site {
     surveySubmissions(first: $first, after: $after, filter: $filter) {
       pageInfo {
@@ -95,7 +98,11 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
         survey {
           id
         }
-        userAnswers(first: $userAnswersFirst2) {
+        userAnswers(first: $userAnswersFirst2, after: $answersAfter) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
           nodes {
             textResponse
             question {
@@ -118,7 +125,8 @@ final class UserSurveys extends Request implements HasBody, HasRequestPagination
                 'filter' => [
                     'userIds' => $this->user_id
                 ],
-                'userAnswersFirst2' => $this->user_answers
+                'userAnswersFirst2' => $this->user_answers,
+                'answersAfter' => $this->answers_after,
             ]
         ];
     }

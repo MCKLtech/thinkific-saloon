@@ -11,6 +11,7 @@ final class Survey
         public Carbon $created_at,
         /** @var Question[] $questions */
         public array  $questions,
+        public ?string $name = null,
     )
     {
     }

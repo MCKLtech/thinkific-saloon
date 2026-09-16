@@ -28,12 +28,17 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
 
     public ?string $after = null;
 
+    /** Cursor into a single submission's userAnswers connection (see QuizService::submissions()). */
+    public ?string $answersAfter = null;
+
     public function __construct(
         private readonly array $filter = [],
         private readonly int   $per_page = 10,
-        private readonly int   $answers_per_page = 25,
+        private readonly int   $answers_per_page = 10,
+        ?string                $answers_after = null,
     )
     {
+        $this->answersAfter = $answers_after;
     }
 
     public function resolveEndpoint(): string
@@ -68,6 +73,8 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
                 question: new QuizQuestion(
                     id: $answer['question']['id'],
                     prompt: isset($answer['question']['prompt']) ? trim(strip_tags($answer['question']['prompt'])) : null,
+                    position: $answer['question']['position'] ?? null,
+                    type: $answer['question']['type'] ?? null,
                 ),
                 choices: array_map(fn($choice) => new QuizChoice(
                     id: $choice['id'],
@@ -76,6 +83,8 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
                     correct: $choice['correct'] ?? false,
                 ), $answer['choices'] ?? []),
             ), $submission['userAnswers']['nodes'] ?? []),
+            hasMoreAnswers: (bool)($submission['userAnswers']['pageInfo']['hasNextPage'] ?? false),
+            answersEndCursor: $submission['userAnswers']['pageInfo']['endCursor'] ?? null,
         ), $nodes);
     }
 
@@ -84,7 +93,7 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
         $filter = array_filter($this->filter, fn($v) => !is_null($v));
 
         return [
-            'query' => 'query SiteQuizSubmissions($first: Int, $after: String, $filter: QuizSubmissionFilter, $answersFirst: Int) {
+            'query' => 'query SiteQuizSubmissions($first: Int, $after: String, $filter: QuizSubmissionFilter, $answersFirst: Int, $answersAfter: String) {
   site {
     quizSubmissions(first: $first, after: $after, filter: $filter) {
       pageInfo {
@@ -112,11 +121,17 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
           firstName
           lastName
         }
-        userAnswers(first: $answersFirst) {
+        userAnswers(first: $answersFirst, after: $answersAfter) {
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
           nodes {
             question {
               id
               prompt
+              position
+              type
             }
             choices {
               id
@@ -135,6 +150,7 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
                 'after'       => $this->after,
                 'filter'      => empty($filter) ? null : $filter,
                 'answersFirst' => $this->answers_per_page,
+                'answersAfter' => $this->answersAfter,
             ],
         ];
     }

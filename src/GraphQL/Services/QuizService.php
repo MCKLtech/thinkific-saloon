@@ -13,30 +13,75 @@ class QuizService extends Resource
     /**
      * Return a paginated list of quiz submissions.
      *
-     * Filter keys: userIds, courseIds, groupIds
+     * Filter keys: userIds, courseIds, groupIds, questionGroupIds, completedAt (DateTimeFilter)
      *
-     * @param array $filter
-     * @param int   $per_page
-     * @param int   $answers_per_page
+     * Each submission carries at most $answers_per_page answers. When a submission
+     * has more, its DTO reports hasMoreAnswers = true and answersEndCursor. The
+     * schema has no by-id lookup for a QuizSubmission, so to drain the rest re-issue
+     * this query with a filter narrow enough to return that submission (e.g. its
+     * userIds + courseIds) and pass answersEndCursor as $answers_after:
+     *
+     *   $answers = $submission->userAnswers;
+     *   $cursor  = $submission->hasMoreAnswers ? $submission->answersEndCursor : null;
+     *   while ($cursor !== null) {
+     *       foreach ($client->quizzes->submissions($filter, answers_after: $cursor)->items() as $page) {
+     *           if ($page->id !== $submission->id) {
+     *               continue;
+     *           }
+     *           $answers = [...$answers, ...$page->userAnswers];
+     *           $cursor  = $page->hasMoreAnswers ? $page->answersEndCursor : null;
+     *           break;
+     *       }
+     *   }
+     *
+     * Note $answers_after is applied to every submission in the page, so only
+     * the answers of the submission the cursor came from are meaningful.
+     *
+     * Cost: nested connections multiply — each request costs roughly
+     * $per_page x $answers_per_page x (choices per answer) against Thinkific's
+     * per-request and per-minute point caps. The default of 10 is deliberately
+     * conservative to stay under the per-request cap; size $answers_per_page to
+     * the quiz's actual question count rather than a blanket large value, and
+     * check hasMoreAnswers on each result to detect truncation.
+     *
+     * @param array       $filter
+     * @param int         $per_page
+     * @param int         $answers_per_page
+     * @param string|null $answers_after  userAnswers cursor from a prior QuizSubmission::$answersEndCursor
      * @return Paginator
      */
-    public function submissions(array $filter = [], int $per_page = 10, int $answers_per_page = 10): Paginator
+    public function submissions(array $filter = [], int $per_page = 10, int $answers_per_page = 10, ?string $answers_after = null): Paginator
     {
-        return (new QuizSubmissions($filter, $per_page, $answers_per_page))
+        return (new QuizSubmissions($filter, $per_page, $answers_per_page, $answers_after))
             ->paginate($this->connector);
     }
 
     /**
      * Return quiz submissions for a specific user.
      *
-     * @param int $userId
-     * @param int $per_page
-     * @param int $answers_per_page
+     * @param int         $userId
+     * @param int         $per_page
+     * @param int         $answers_per_page
+     * @param string|null $answers_after  See submissions()
      * @return Paginator
      */
-    public function submissionsForUser(int $userId, int $per_page = 10, int $answers_per_page = 10): Paginator
+    public function submissionsForUser(int $userId, int $per_page = 10, int $answers_per_page = 10, ?string $answers_after = null): Paginator
     {
-        return $this->submissions(['userIds' => [$userId]], $per_page, $answers_per_page);
+        return $this->submissions(['userIds' => [$userId]], $per_page, $answers_per_page, $answers_after);
+    }
+
+    /**
+     * Return quiz submissions for several users through one paginated operation.
+     *
+     * @param int[]       $userIds
+     * @param int         $per_page
+     * @param int         $answers_per_page
+     * @param string|null $answers_after  See submissions()
+     * @return Paginator
+     */
+    public function submissionsForUsers(array $userIds, int $per_page = 10, int $answers_per_page = 10, ?string $answers_after = null): Paginator
+    {
+        return $this->submissions(['userIds' => array_values($userIds)], $per_page, $answers_per_page, $answers_after);
     }
 
     /**

@@ -19,6 +19,13 @@ final class QuizSubmission
         public User    $user,
         /** @var QuizAnswer[] */
         public array   $userAnswers,
+        /**
+         * True when the API has more answers for this submission than fit in
+         * one page. Re-query with `answers_after: $answersEndCursor` to fetch
+         * the next page of answers.
+         */
+        public bool    $hasMoreAnswers = false,
+        public ?string $answersEndCursor = null,
     )
     {
     }
