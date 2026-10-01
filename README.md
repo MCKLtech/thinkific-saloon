@@ -139,6 +139,31 @@ try {
 }
 ```
 
+### Quiz definitions
+
+`quizzes->definitions()` returns a cursor-paginated list of quiz definitions (`Site.quizzes` →
+`questions` → `choices`) and `quizzes->allDefinitions()` walks every page and returns them keyed by
+quiz id, draining each quiz's truncated `questions` connection. There is **no page cap**: the walk
+terminates on `hasNextPage === false` or a non-advancing cursor, so sites with thousands of quizzes
+are read in full.
+
+```php
+/* Paginated: yields QuizDefinition objects */
+foreach ($client->quizzes->definitions()->items() as $quiz) {
+    // ...
+}
+
+/* Assembled map: array<string, QuizDefinition>, questions drained per quiz */
+$definitions = $client->quizzes->allDefinitions();
+$quiz        = $definitions['quiz_1'];
+```
+
+**Cost:** each request costs roughly `2 + ceil(per_page * questions_per_page * choices_per_page / 100)`
+points (25×25×15 measured 96 points — comfortably under the 1000-point single-request cap). The binding
+limit is the 2000-points/minute budget, so size the nested pages to your needs. **Choices are not
+drained:** a question with `hasMoreChoices = true` is surfaced on the DTO (with `choicesEndCursor`) for
+the caller to treat as incomplete.
+
 ## Support, Issues & Bugs
 
 This library is unofficial and is not endorsed or supported by Thinkific.

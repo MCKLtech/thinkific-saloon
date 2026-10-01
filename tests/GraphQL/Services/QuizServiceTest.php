@@ -5,12 +5,17 @@ namespace WooNinja\ThinkificSaloon\Tests\GraphQL\Services;
 use Carbon\Carbon;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Courses\Course;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\Quiz;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizDefinition;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizDefinitionChoice;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizDefinitionQuestion;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizLocation;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizSubmission;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Courses\Course as CourseRequest;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Courses\Courses;
 use Saloon\Http\Faking\MockClient;
+use Saloon\Http\PendingRequest;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\User;
+use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizDefinitions;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizSubmissions;
 use WooNinja\ThinkificSaloon\Tests\GraphQL\GraphQLTestCase;
 
@@ -512,5 +517,448 @@ class QuizServiceTest extends GraphQLTestCase
         $resolved = $this->gql->quizzes->locateSubmission($submission, []);
 
         $this->assertNull($resolved);
+    }
+
+    // -------------------------------------------------------------------------
+    // definitions()
+    // -------------------------------------------------------------------------
+
+    public function test_definitions_returns_quiz_definition_dtos(): void
+    {
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([$this->gqlQuizDefinitionNode()])],
+            ]),
+        ]);
+
+        $items = iterator_to_array($this->gql->quizzes->definitions()->items());
+
+        $this->assertCount(1, $items);
+        $this->assertInstanceOf(QuizDefinition::class, $items[0]);
+        $this->assertEquals('quiz_1', $items[0]->id);
+        $this->assertCount(1, $items[0]->questions);
+        $this->assertInstanceOf(QuizDefinitionQuestion::class, $items[0]->questions[0]);
+        $this->assertInstanceOf(QuizDefinitionChoice::class, $items[0]->questions[0]->choices[0]);
+    }
+
+    public function test_definitions_maps_questions_choices_and_correct_flag(): void
+    {
+        $node = $this->gqlQuizDefinitionNode([
+            'name'      => '  <b>Chapter</b> 1 Quiz ',
+            'questions' => [
+                'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                'nodes'    => [[
+                    'id'       => 'q_1',
+                    'prompt'   => '<p>What is <em>2+2</em>?</p>',
+                    'position' => 3,
+                    'type'     => 'MULTIPLE_CHOICE',
+                    'choices'  => [
+                        'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                        'nodes'    => [
+                            ['id' => 'c_1', 'text' => '<b>Four</b>', 'position' => 1, 'correct' => true],
+                            ['id' => 'c_2', 'text' => 'Five', 'position' => 2, 'correct' => false],
+                        ],
+                    ],
+                ]],
+            ],
+        ]);
+
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([$node])],
+            ]),
+        ]);
+
+        $quiz = iterator_to_array($this->gql->quizzes->definitions()->items())[0];
+
+        $this->assertEquals('Chapter 1 Quiz', $quiz->name);
+        $this->assertEquals('What is 2+2?', $quiz->questions[0]->prompt);
+        $this->assertEquals('Four', $quiz->questions[0]->choices[0]->text);
+        $this->assertTrue($quiz->questions[0]->choices[0]->correct);
+        $this->assertFalse($quiz->questions[0]->choices[1]->correct);
+        $this->assertSame(3, $quiz->questions[0]->position);
+    }
+
+    public function test_definitions_terminates_at_last_page(): void
+    {
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([$this->gqlQuizDefinitionNode()], hasNextPage: false)],
+            ]),
+        ]);
+
+        $pages = 0;
+        foreach ($this->gql->quizzes->definitions() as $_page) {
+            $pages++;
+        }
+
+        $this->assertEquals(1, $pages);
+    }
+
+    public function test_definitions_exposes_question_page_info(): void
+    {
+        $node = $this->gqlQuizDefinitionNode([
+            'questions' => [
+                'pageInfo' => ['hasNextPage' => true, 'endCursor' => 'qs_cursor_2'],
+                'nodes'    => [[
+                    'id'       => 'q_1',
+                    'prompt'   => 'What is 2+2?',
+                    'position' => 1,
+                    'type'     => 'MULTIPLE_CHOICE',
+                    'choices'  => [
+                        'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                        'nodes'    => [['id' => 'c_1', 'text' => 'Four', 'position' => 1, 'correct' => true]],
+                    ],
+                ]],
+            ],
+        ]);
+
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([$node])],
+            ]),
+        ]);
+
+        $quiz = iterator_to_array($this->gql->quizzes->definitions()->items())[0];
+
+        $this->assertTrue($quiz->hasMoreQuestions);
+        $this->assertEquals('qs_cursor_2', $quiz->questionsEndCursor);
+    }
+
+    public function test_definitions_flags_truncated_choice_page(): void
+    {
+        $node = $this->gqlQuizDefinitionNode([
+            'questions' => [
+                'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                'nodes'    => [[
+                    'id'       => 'q_1',
+                    'prompt'   => 'Pick all',
+                    'position' => 1,
+                    'type'     => 'MULTIPLE_ANSWERS',
+                    'choices'  => [
+                        'pageInfo' => ['hasNextPage' => true, 'endCursor' => 'cs_cursor_2'],
+                        'nodes'    => [['id' => 'c_1', 'text' => 'A', 'position' => 1, 'correct' => true]],
+                    ],
+                ]],
+            ],
+        ]);
+
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([$node])],
+            ]),
+        ]);
+
+        $question = iterator_to_array($this->gql->quizzes->definitions()->items())[0]->questions[0];
+
+        $this->assertTrue($question->hasMoreChoices);
+        $this->assertEquals('cs_cursor_2', $question->choicesEndCursor);
+    }
+
+    public function test_definitions_passes_questions_after_cursor_to_query(): void
+    {
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([$this->gqlQuizDefinitionNode()])],
+            ]),
+        ]);
+
+        $request = new QuizDefinitions([], 25, 25, 15, 'qs_cursor_2');
+        $this->gql->connector()->send($request);
+
+        MockClient::getGlobal()->assertSent(function (QuizDefinitions $request) {
+            $body = $request->body()->all();
+
+            return $body['variables']['questionsAfter'] === 'qs_cursor_2'
+                && str_contains($body['query'], 'questions(first: $questionsFirst, after: $questionsAfter)')
+                && str_contains($body['query'], 'choices(first: $choicesFirst)')
+                && str_contains($body['query'], 'correct');
+        });
+    }
+
+    public function test_definitions_sends_null_questions_after_by_default(): void
+    {
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([$this->gqlQuizDefinitionNode()])],
+            ]),
+        ]);
+
+        iterator_to_array($this->gql->quizzes->definitions()->items());
+
+        MockClient::getGlobal()->assertSent(
+            fn (QuizDefinitions $request) => $request->body()->all()['variables']['questionsAfter'] === null
+        );
+    }
+
+    public function test_definitions_request_constructs_with_original_positional_arguments(): void
+    {
+        $request = new QuizDefinitions([], 5, 6, 7);
+        $vars    = $request->body()->all()['variables'];
+
+        $this->assertSame(5, $vars['first']);
+        $this->assertSame(6, $vars['questionsFirst']);
+        $this->assertSame(7, $vars['choicesFirst']);
+        $this->assertNull($vars['questionsAfter']);
+    }
+
+    // -------------------------------------------------------------------------
+    // allDefinitions()
+    // -------------------------------------------------------------------------
+
+    public function test_all_definitions_returns_map_keyed_by_quiz_id(): void
+    {
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([
+                    $this->gqlQuizDefinitionNode(['id' => 'quiz_a']),
+                    $this->gqlQuizDefinitionNode(['id' => 'quiz_b']),
+                ])],
+            ]),
+        ]);
+
+        $index = $this->gql->quizzes->allDefinitions();
+
+        $this->assertCount(2, $index);
+        $this->assertArrayHasKey('quiz_a', $index);
+        $this->assertArrayHasKey('quiz_b', $index);
+        $this->assertInstanceOf(QuizDefinition::class, $index['quiz_a']);
+    }
+
+    public function test_all_definitions_drains_truncated_questions_by_id(): void
+    {
+        // Page 1 (after = null): quiz A complete. Page 2 (after = outer_2): quiz B truncated.
+        // The drain of B must re-issue page 2 (same outer cursor, questionsAfter = b_cursor).
+        $mock = function (PendingRequest $pending) {
+            $vars = $pending->body()->all()['variables'];
+
+            if ($vars['after'] === null) {
+                return $this->gqlResponse([
+                    'site' => ['quizzes' => [
+                        'pageInfo' => ['hasNextPage' => true, 'endCursor' => 'outer_2', 'hasPreviousPage' => false, 'startCursor' => 's'],
+                        'nodes'    => [$this->gqlQuizDefinitionNode([
+                            'id'        => 'quiz_a',
+                            'questions' => [
+                                'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                                'nodes'    => [[
+                                    'id' => 'a1', 'prompt' => 'A1', 'position' => 1, 'type' => 'MULTIPLE_CHOICE',
+                                    'choices' => ['pageInfo' => ['hasNextPage' => false, 'endCursor' => null], 'nodes' => []],
+                                ]],
+                            ],
+                        ])],
+                    ]],
+                ]);
+            }
+
+            // Page 2, first read has no questionsAfter; the drain read has questionsAfter=b_cursor.
+            $questions = $vars['questionsAfter'] === null
+                ? [[
+                    'id' => 'b1', 'prompt' => 'B1', 'position' => 1, 'type' => 'MULTIPLE_CHOICE',
+                    'choices' => ['pageInfo' => ['hasNextPage' => false, 'endCursor' => null], 'nodes' => []],
+                ]]
+                : [[
+                    'id' => 'b2', 'prompt' => 'B2', 'position' => 2, 'type' => 'MULTIPLE_CHOICE',
+                    'choices' => ['pageInfo' => ['hasNextPage' => false, 'endCursor' => null], 'nodes' => []],
+                ]];
+
+            return $this->gqlResponse([
+                'site' => ['quizzes' => [
+                    'pageInfo' => ['hasNextPage' => false, 'endCursor' => 'outer_end', 'hasPreviousPage' => false, 'startCursor' => 's'],
+                    'nodes'    => [$this->gqlQuizDefinitionNode([
+                        'id'        => 'quiz_b',
+                        'questions' => [
+                            'pageInfo' => $vars['questionsAfter'] === null
+                                ? ['hasNextPage' => true, 'endCursor' => 'b_cursor']
+                                : ['hasNextPage' => false, 'endCursor' => null],
+                            'nodes'    => $questions,
+                        ],
+                    ])],
+                ]],
+            ]);
+        };
+
+        $this->mockGql([QuizDefinitions::class => $mock]);
+
+        $index = $this->gql->quizzes->allDefinitions(per_page: 2);
+
+        $this->assertCount(2, $index);
+        $this->assertEquals(['a1'], array_map(fn ($q) => $q->id, $index['quiz_a']->questions));
+        $this->assertEquals(['b1', 'b2'], array_map(fn ($q) => $q->id, $index['quiz_b']->questions));
+        $this->assertFalse($index['quiz_b']->hasMoreQuestions);
+
+        MockClient::getGlobal()->assertSent(function (QuizDefinitions $request) {
+            $vars = $request->body()->all()['variables'];
+
+            return $vars['after'] === 'outer_2' && $vars['questionsAfter'] === 'b_cursor';
+        });
+    }
+
+    public function test_all_definitions_completes_beyond_1000_quizzes(): void
+    {
+        // Primary regression: 2,820 quizzes at perPage=25 = 113 pages, far past the app-side
+        // 1000-page cap. A stateful mock advances endCursor on every call.
+        $total  = 2820;
+        $calls  = 0;
+        $mock   = function (PendingRequest $pending) use (&$calls, $total) {
+            $calls++;
+
+            if ($calls > 200) {
+                throw new \RuntimeException('allDefinitions walk did not terminate.');
+            }
+
+            $start = ($calls - 1) * 25;
+            $nodes = [];
+
+            for ($id = $start; $id < min($start + 25, $total); $id++) {
+                $nodes[] = ['id' => (string) $id, 'name' => 'Quiz ' . $id, 'questions' => [
+                    'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                    'nodes'    => [],
+                ]];
+            }
+
+            $hasNext = ($start + 25) < $total;
+
+            return $this->gqlResponse([
+                'site' => ['quizzes' => [
+                    'pageInfo' => [
+                        'hasNextPage'     => $hasNext,
+                        'endCursor'       => $hasNext ? 'cursor_' . ($start + 25) : null,
+                        'hasPreviousPage' => false,
+                        'startCursor'     => 'cursor_' . $start,
+                    ],
+                    'nodes'    => $nodes,
+                ]],
+            ]);
+        };
+
+        $this->mockGql([QuizDefinitions::class => $mock]);
+
+        $index = $this->gql->quizzes->allDefinitions(per_page: 25);
+
+        $this->assertCount($total, $index);
+        $this->assertArrayHasKey('0', $index);
+        $this->assertArrayHasKey('2819', $index);
+        MockClient::getGlobal()->assertSentCount(113);
+    }
+
+    public function test_all_definitions_stops_on_non_advancing_outer_cursor(): void
+    {
+        $calls    = 0;
+        $mock     = function (PendingRequest $pending) use (&$calls) {
+            $calls++;
+
+            if ($calls > 10) {
+                throw new \RuntimeException('allDefinitions hung on a non-advancing outer cursor.');
+            }
+
+            return $this->gqlResponse([
+                'site' => ['quizzes' => [
+                    'pageInfo' => ['hasNextPage' => true, 'endCursor' => 'same', 'hasPreviousPage' => false, 'startCursor' => 's'],
+                    'nodes'    => [$this->gqlQuizDefinitionNode(['id' => 'quiz_' . $calls])],
+                ]],
+            ]);
+        };
+
+        $this->mockGql([QuizDefinitions::class => $mock]);
+
+        $index = $this->gql->quizzes->allDefinitions();
+
+        $this->assertCount(2, $index);
+    }
+
+    public function test_all_definitions_stops_on_non_advancing_questions_cursor(): void
+    {
+        $calls = 0;
+        $mock  = function (PendingRequest $pending) use (&$calls) {
+            $calls++;
+
+            if ($calls > 10) {
+                throw new \RuntimeException('allDefinitions hung on a non-advancing questions cursor.');
+            }
+
+            $vars = $pending->body()->all()['variables'];
+
+            return $this->gqlResponse([
+                'site' => ['quizzes' => [
+                    'pageInfo' => ['hasNextPage' => false, 'endCursor' => 'outer_end', 'hasPreviousPage' => false, 'startCursor' => 's'],
+                    'nodes'    => [$this->gqlQuizDefinitionNode([
+                        'id'        => 'quiz_b',
+                        'questions' => [
+                            'pageInfo' => ['hasNextPage' => true, 'endCursor' => 'same_qs'],
+                            'nodes'    => [[
+                                'id' => $vars['questionsAfter'] === null ? 'b1' : 'b2',
+                                'prompt' => 'B', 'position' => 1, 'type' => 'MULTIPLE_CHOICE',
+                                'choices' => ['pageInfo' => ['hasNextPage' => false, 'endCursor' => null], 'nodes' => []],
+                            ]],
+                        ],
+                    ])],
+                ]],
+            ]);
+        };
+
+        $this->mockGql([QuizDefinitions::class => $mock]);
+
+        $index = $this->gql->quizzes->allDefinitions();
+
+        $this->assertCount(1, $index);
+        $this->assertSame('quiz_b', $index['quiz_b']->id);
+    }
+
+    public function test_all_definitions_handles_quiz_vanishing_during_drain(): void
+    {
+        $mock = function (PendingRequest $pending) {
+            $vars = $pending->body()->all()['variables'];
+
+            if ($vars['questionsAfter'] !== null) {
+                // Drain re-issue omits the target quiz entirely.
+                return $this->gqlResponse([
+                    'site' => ['quizzes' => [
+                        'pageInfo' => ['hasNextPage' => false, 'endCursor' => 'outer_end', 'hasPreviousPage' => false, 'startCursor' => 's'],
+                        'nodes'    => [],
+                    ]],
+                ]);
+            }
+
+            return $this->gqlResponse([
+                'site' => ['quizzes' => [
+                    'pageInfo' => ['hasNextPage' => false, 'endCursor' => 'outer_end', 'hasPreviousPage' => false, 'startCursor' => 's'],
+                    'nodes'    => [$this->gqlQuizDefinitionNode([
+                        'id'        => 'quiz_b',
+                        'questions' => [
+                            'pageInfo' => ['hasNextPage' => true, 'endCursor' => 'b_cursor'],
+                            'nodes'    => [[
+                                'id' => 'b1', 'prompt' => 'B1', 'position' => 1, 'type' => 'MULTIPLE_CHOICE',
+                                'choices' => ['pageInfo' => ['hasNextPage' => false, 'endCursor' => null], 'nodes' => []],
+                            ]],
+                        ],
+                    ])],
+                ]],
+            ]);
+        };
+
+        $this->mockGql([QuizDefinitions::class => $mock]);
+
+        $index = $this->gql->quizzes->allDefinitions();
+
+        $this->assertCount(1, $index);
+        $this->assertEquals(['b1'], array_map(fn ($q) => $q->id, $index['quiz_b']->questions));
+        $this->assertTrue($index['quiz_b']->hasMoreQuestions);
+    }
+
+    public function test_all_definitions_handles_null_questions_connection(): void
+    {
+        $this->mockGql([
+            QuizDefinitions::class => $this->gqlResponse([
+                'site' => ['quizzes' => $this->gqlConnection([
+                    $this->gqlQuizDefinitionNode(['id' => 'quiz_none', 'questions' => null]),
+                ])],
+            ]),
+        ]);
+
+        $index = $this->gql->quizzes->allDefinitions();
+
+        $this->assertSame([], $index['quiz_none']->questions);
+        $this->assertFalse($index['quiz_none']->hasMoreQuestions);
+        $this->assertNull($index['quiz_none']->questionsEndCursor);
     }
 }

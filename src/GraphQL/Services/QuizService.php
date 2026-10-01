@@ -4,8 +4,10 @@ namespace WooNinja\ThinkificSaloon\GraphQL\Services;
 
 use Saloon\PaginationPlugin\Paginator;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Courses\Course;
+use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizDefinition;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizLocation;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizSubmission;
+use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizDefinitions;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizSubmissions;
 
 class QuizService extends Resource
@@ -173,5 +175,104 @@ class QuizService extends Resource
     public function locateSubmission(QuizSubmission $submission, array $index): ?QuizLocation
     {
         return $index[$submission->quiz->id] ?? null;
+    }
+
+    /**
+     * Return a cursor-paginated list of quiz definitions (Site.quizzes -> questions -> choices).
+     * Yields QuizDefinition[] per page. Use allDefinitions() for the assembled map.
+     * Cost: charged 2 + ceil(per_page * questions_per_page * choices_per_page / 100) per request
+     * (25x25x15 measured 96 points; a single request stays far under the 1000-point cap). The
+     * binding budget is the 2000-points/minute rate limit. choices are NOT drained: a question
+     * with hasMoreChoices=true is surfaced on the DTO for the caller to treat as incomplete.
+     *
+     * Note: the paginator throws PaginationException on a stalled outer cursor (5 identical pages);
+     * allDefinitions() does its own raw walk and instead returns early on a non-advancing cursor.
+     */
+    public function definitions(array $filter = [], int $per_page = 25, int $questions_per_page = 25, int $choices_per_page = 15): Paginator
+    {
+        return (new QuizDefinitions($filter, $per_page, $questions_per_page, $choices_per_page))
+            ->paginate($this->connector);
+    }
+
+    /**
+     * Walk every quiz definition and return them keyed by quiz id, draining each truncated
+     * quiz's questions connection. No page cap: the walk terminates on hasNextPage=false or a
+     * non-advancing cursor.
+     *
+     * @return array<string, QuizDefinition>
+     */
+    public function allDefinitions(array $filter = [], int $per_page = 25, int $questions_per_page = 25, int $choices_per_page = 15): array
+    {
+        $index = [];
+        $after = null;
+
+        while (true) {
+            $response  = $this->connector->send($this->newQuizDefinitionsRequest($filter, $per_page, $questions_per_page, $choices_per_page, $after));
+            $pageInfo  = $response->json('data.site.quizzes.pageInfo') ?? [];
+            $hasNext   = (bool) ($pageInfo['hasNextPage'] ?? false);
+            $endCursor = $pageInfo['endCursor'] ?? null;
+
+            foreach ($response->dto() as $quiz) {
+                $index[$quiz->id] = $this->drainQuizQuestions($quiz, $after, $filter, $per_page, $questions_per_page, $choices_per_page);
+            }
+
+            if (! $hasNext || $endCursor === null || $endCursor === '' || $endCursor === $after) {
+                break;
+            }
+
+            $after = $endCursor;
+        }
+
+        return $index;
+    }
+
+    /**
+     * Drain a single quiz's remaining questions by re-issuing the SAME outer page with the
+     * questions cursor and re-selecting the quiz by id (questionsAfter applies to every quiz
+     * on the page, so siblings must be ignored).
+     */
+    private function drainQuizQuestions(QuizDefinition $quiz, ?string $after, array $filter, int $per_page, int $questions_per_page, int $choices_per_page): QuizDefinition
+    {
+        $cursor = $quiz->hasMoreQuestions ? $quiz->questionsEndCursor : null;
+
+        while ($cursor !== null && $cursor !== '') {
+            $response = $this->connector->send(
+                $this->newQuizDefinitionsRequest($filter, $per_page, $questions_per_page, $choices_per_page, $after, $cursor)
+            );
+
+            $next = null;
+            foreach ($response->dto() as $candidate) {
+                if ($candidate->id === $quiz->id) {
+                    $next = $candidate;
+                    break;
+                }
+            }
+
+            if ($next === null) {
+                break;
+            }
+
+            $quiz->questions          = array_merge($quiz->questions, $next->questions);
+            $quiz->hasMoreQuestions   = $next->hasMoreQuestions;
+            $quiz->questionsEndCursor = $next->questionsEndCursor;
+
+            $nextCursor = $next->hasMoreQuestions ? $next->questionsEndCursor : null;
+
+            if ($nextCursor === null || $nextCursor === '' || $nextCursor === $cursor) {
+                break;
+            }
+
+            $cursor = $nextCursor;
+        }
+
+        return $quiz;
+    }
+
+    private function newQuizDefinitionsRequest(array $filter, int $per_page, int $questions_per_page, int $choices_per_page, ?string $after, ?string $questions_after = null): QuizDefinitions
+    {
+        $request           = new QuizDefinitions($filter, $per_page, $questions_per_page, $choices_per_page, $questions_after);
+        $request->after    = $after;
+
+        return $request;
     }
 }

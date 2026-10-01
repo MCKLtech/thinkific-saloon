@@ -335,6 +335,35 @@ abstract class GraphQLTestCase extends TestCase
         ], $overrides);
     }
 
+    /**
+     * A Quiz as returned by SiteQuizDefinitions::createDtoFromResponse().
+     * Shape: quiz {id, name, questions:{pageInfo, nodes:[{id,prompt,position,type,
+     * choices:{pageInfo, nodes:[{id,text,position,correct}]}}]}}.
+     */
+    protected function gqlQuizDefinitionNode(array $overrides = []): array
+    {
+        return array_merge([
+            'id'        => 'quiz_1',
+            'name'      => 'Chapter 1 Quiz',
+            'questions' => [
+                'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                'nodes'    => [[
+                    'id'       => 'q_1',
+                    'prompt'   => 'What is 2+2?',
+                    'position' => 1,
+                    'type'     => 'MULTIPLE_CHOICE',
+                    'choices'  => [
+                        'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                        'nodes'    => [
+                            ['id' => 'c_1', 'text' => 'Four', 'position' => 1, 'correct' => true],
+                            ['id' => 'c_2', 'text' => 'Five', 'position' => 2, 'correct' => false],
+                        ],
+                    ],
+                ]],
+            ],
+        ], $overrides);
+    }
+
     protected function gqlSurveyResponseNode(array $overrides = []): array
     {
         return array_merge([
