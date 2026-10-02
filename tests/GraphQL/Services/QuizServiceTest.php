@@ -445,6 +445,23 @@ class QuizServiceTest extends GraphQLTestCase
         $this->assertEmpty($index);
     }
 
+    public function test_quiz_locations_for_course_skips_lessons_with_null_content(): void
+    {
+        // A lesson with null content must not abort the walk; it simply carries no quiz.
+        $chapter = $this->gqlChapterNode();
+        $chapter['lessons']['nodes'][0]['content'] = null;
+
+        $this->mockGql([
+            CourseRequest::class => $this->gqlResponse([
+                'course' => ['curriculum' => ['chapters' => $this->gqlConnection([$chapter])]],
+            ]),
+        ]);
+
+        $index = $this->gql->quizzes->quizLocationsForCourse(101);
+
+        $this->assertEmpty($index);
+    }
+
     // -------------------------------------------------------------------------
     // quizLocations()
     // -------------------------------------------------------------------------

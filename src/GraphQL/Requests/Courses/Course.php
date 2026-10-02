@@ -50,11 +50,14 @@ final class Course extends Request implements HasBody, HasRequestPagination, Pag
                 lessonType: $lesson['lessonType'],
                 title: $lesson['title'],
                 takeUrl: $lesson['takeUrl'],
-                content: new Content(
+                // A lesson may have no Content (GraphQL returns null). Guarding here
+                // prevents "Trying to access array offset on null" from aborting the
+                // whole curriculum page (and the quiz-answer sync that depends on it).
+                content: isset($lesson['content']) ? new Content(
                     id: $lesson['content']['id'],
                     contentType: $lesson['content']['contentType'],
                     quizId: $lesson['content']['quiz']['id'] ?? null
-                )
+                ) : null
             ), $chapter['lessons']['nodes'] ?? [])
         ), $nodes);
     }

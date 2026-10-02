@@ -149,6 +149,40 @@ class CourseServiceTest extends GraphQLTestCase
         $this->assertEquals('video', $items[0]->lessons[0]->content->contentType);
     }
 
+    public function test_chapters_tolerates_lesson_with_null_content(): void
+    {
+        // Regression: a lesson whose Content is null previously threw
+        // "Trying to access array offset on null" in Course::createDtoFromResponse(),
+        // aborting the whole curriculum page and the quiz-answer sync behind it.
+        $chapter = $this->gqlChapterNode([
+            'lessons' => [
+                'nodes' => [[
+                    'id'         => 402,
+                    'lessonType' => 'text',
+                    'title'      => 'Lesson without content',
+                    'takeUrl'    => null,
+                    'content'    => null,
+                ]],
+            ],
+        ]);
+
+        $this->mockGql([
+            CourseRequest::class => $this->gqlResponse([
+                'course' => [
+                    'curriculum' => [
+                        'chapters' => $this->gqlConnection([$chapter]),
+                    ],
+                ],
+            ]),
+        ]);
+
+        $items = iterator_to_array($this->gql->courses->chapters(101)->items());
+
+        $this->assertCount(1, $items[0]->lessons);
+        $this->assertInstanceOf(Lesson::class, $items[0]->lessons[0]);
+        $this->assertNull($items[0]->lessons[0]->content);
+    }
+
     public function test_chapters_paginator_reads_page_info_correctly(): void
     {
         // Regression test for the bug where paginator read chapters.endCursor
