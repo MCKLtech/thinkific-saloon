@@ -17,6 +17,7 @@ use Saloon\Http\PendingRequest;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Users\User;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizDefinitions;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizSubmissions;
+use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizSubmissionsSummary;
 use WooNinja\ThinkificSaloon\Tests\GraphQL\GraphQLTestCase;
 
 class QuizServiceTest extends GraphQLTestCase
@@ -977,5 +978,159 @@ class QuizServiceTest extends GraphQLTestCase
         $this->assertSame([], $index['quiz_none']->questions);
         $this->assertFalse($index['quiz_none']->hasMoreQuestions);
         $this->assertNull($index['quiz_none']->questionsEndCursor);
+    }
+
+    // -------------------------------------------------------------------------
+    // submissionsSummary() / submissionsSummaryForUser() / submissionsSummaryForUsers()
+    // -------------------------------------------------------------------------
+
+    public function test_submissions_summary_returns_dtos_without_answers(): void
+    {
+        $node = $this->gqlQuizSubmissionNode();
+        unset($node['userAnswers']);
+
+        $this->mockGql([
+            QuizSubmissionsSummary::class => $this->gqlResponse([
+                'site' => ['quizSubmissions' => $this->gqlConnection([$node])],
+            ]),
+        ]);
+
+        $items = iterator_to_array($this->gql->quizzes->submissionsSummary()->items());
+
+        $this->assertCount(1, $items);
+        $this->assertInstanceOf(QuizSubmission::class, $items[0]);
+        $this->assertEquals('sub_301', $items[0]->id);
+        $this->assertSame(1, $items[0]->attempts);
+        $this->assertSame(3, $items[0]->correctCount);
+        $this->assertSame(1, $items[0]->incorrectCount);
+        $this->assertTrue($items[0]->passed);
+        $this->assertEquals(75.0, $items[0]->percentageScore());
+        $this->assertSame([], $items[0]->userAnswers);
+        $this->assertFalse($items[0]->hasMoreAnswers);
+        $this->assertNull($items[0]->answersEndCursor);
+    }
+
+    public function test_submissions_summary_node_omitting_user_answers_hydrates(): void
+    {
+        // The summary shape never selects userAnswers, so the API omits the key
+        // entirely; the shared mapper must still hydrate the submission.
+        $node = $this->gqlQuizSubmissionNode();
+        unset($node['userAnswers']);
+
+        $this->mockGql([
+            QuizSubmissionsSummary::class => $this->gqlResponse([
+                'site' => ['quizSubmissions' => $this->gqlConnection([$node])],
+            ]),
+        ]);
+
+        $submission = iterator_to_array($this->gql->quizzes->submissionsSummary()->items())[0];
+
+        $this->assertEquals('sub_301', $submission->id);
+        $this->assertSame([], $submission->userAnswers);
+        $this->assertFalse($submission->hasMoreAnswers);
+        $this->assertNull($submission->answersEndCursor);
+    }
+
+    public function test_submissions_summary_query_has_no_user_answers_block_or_variables(): void
+    {
+        $body = (new QuizSubmissionsSummary())->body()->all();
+
+        $this->assertStringNotContainsString('userAnswers', $body['query']);
+        $this->assertStringNotContainsString('answersFirst', $body['query']);
+        $this->assertStringNotContainsString('answersAfter', $body['query']);
+        $this->assertStringContainsString('query SiteQuizSubmissionsSummary', $body['query']);
+        $this->assertArrayNotHasKey('answersFirst', $body['variables']);
+        $this->assertArrayNotHasKey('answersAfter', $body['variables']);
+        $this->assertArrayNotHasKey('answers_per_page', $body['variables']);
+        $this->assertSame(['first', 'after', 'filter'], array_keys($body['variables']));
+    }
+
+    public function test_submissions_summary_for_user_filters_by_user_id(): void
+    {
+        $this->mockGql([
+            QuizSubmissionsSummary::class => $this->gqlResponse([
+                'site' => ['quizSubmissions' => $this->gqlConnection([$this->gqlQuizSubmissionNode()])],
+            ]),
+        ]);
+
+        $items = iterator_to_array($this->gql->quizzes->submissionsSummaryForUser(1)->items());
+
+        $this->assertCount(1, $items);
+        MockClient::getGlobal()->assertSent(
+            fn (QuizSubmissionsSummary $request) => $request->body()->all()['variables']['filter'] === ['userIds' => [1]]
+        );
+    }
+
+    public function test_submissions_summary_for_users_filters_by_all_user_ids(): void
+    {
+        $this->mockGql([
+            QuizSubmissionsSummary::class => $this->gqlResponse([
+                'site' => ['quizSubmissions' => $this->gqlConnection([$this->gqlQuizSubmissionNode()])],
+            ]),
+        ]);
+
+        iterator_to_array($this->gql->quizzes->submissionsSummaryForUsers(['a' => 1, 'b' => 2])->items());
+
+        MockClient::getGlobal()->assertSent(
+            fn (QuizSubmissionsSummary $request) => $request->body()->all()['variables']['filter'] === ['userIds' => [1, 2]]
+        );
+    }
+
+    public function test_submissions_summary_terminates_at_last_page(): void
+    {
+        $this->mockGql([
+            QuizSubmissionsSummary::class => $this->gqlResponse([
+                'site' => ['quizSubmissions' => $this->gqlConnection([$this->gqlQuizSubmissionNode()], hasNextPage: false)],
+            ]),
+        ]);
+
+        $pages = 0;
+        foreach ($this->gql->quizzes->submissionsSummary() as $_page) {
+            $pages++;
+        }
+
+        $this->assertEquals(1, $pages);
+    }
+
+    public function test_submissions_summary_paginates_with_next_after_cursor(): void
+    {
+        $mock = function (PendingRequest $pending) {
+            $after = $pending->body()->all()['variables']['after'];
+
+            if ($after === null) {
+                return $this->gqlResponse([
+                    'site' => ['quizSubmissions' => $this->gqlConnection(
+                        [$this->gqlQuizSubmissionNode(['id' => 'sub_1'])],
+                        hasNextPage: true,
+                        endCursor: 'cursor_2',
+                    )],
+                ]);
+            }
+
+            return $this->gqlResponse([
+                'site' => ['quizSubmissions' => $this->gqlConnection(
+                    [$this->gqlQuizSubmissionNode(['id' => 'sub_2'])],
+                    hasNextPage: false,
+                )],
+            ]);
+        };
+
+        $this->mockGql([QuizSubmissionsSummary::class => $mock]);
+
+        $pages = 0;
+        $ids   = [];
+        foreach ($this->gql->quizzes->submissionsSummary() as $response) {
+            $pages++;
+            foreach ($response->dto() as $submission) {
+                $ids[] = $submission->id;
+            }
+        }
+
+        $this->assertSame(2, $pages);
+        $this->assertSame(['sub_1', 'sub_2'], $ids);
+
+        MockClient::getGlobal()->assertSent(
+            fn (QuizSubmissionsSummary $request) => $request->body()->all()['variables']['after'] === 'cursor_2'
+        );
     }
 }

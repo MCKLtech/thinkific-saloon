@@ -10,24 +10,26 @@ use Saloon\PaginationPlugin\Contracts\Paginatable;
 use Saloon\Traits\Body\HasJsonBody;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\Concerns\MapsQuizSubmissions;
 
-final class QuizSubmissions extends Request implements HasBody, HasRequestPagination, Paginatable
+/**
+ * The no-answers shape of site.quizSubmissions.
+ *
+ * Measured cost: ~22 points for 10 rows versus ~522 for the same page with the
+ * userAnswers block. Use when only counts/attempts are needed and the
+ * per-question answers can be skipped. Returned QuizSubmission::userAnswers is
+ * always empty and hasMoreAnswers is always false.
+ */
+final class QuizSubmissionsSummary extends Request implements HasBody, HasRequestPagination, Paginatable
 {
     use HasJsonBody;
     use MapsQuizSubmissions;
 
     protected Method $method = Method::POST;
 
-    /** Cursor into a single submission's userAnswers connection (see QuizService::submissions()). */
-    public ?string $answersAfter = null;
-
     public function __construct(
         private readonly array $filter = [],
         private readonly int   $per_page = 10,
-        private readonly int   $answers_per_page = 10,
-        ?string                $answers_after = null,
     )
     {
-        $this->answersAfter = $answers_after;
     }
 
     public function resolveEndpoint(): string
@@ -40,7 +42,7 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
         $filter = array_filter($this->filter, fn($v) => !is_null($v));
 
         return [
-            'query' => 'query SiteQuizSubmissions($first: Int, $after: String, $filter: QuizSubmissionFilter, $answersFirst: Int, $answersAfter: String) {
+            'query' => 'query SiteQuizSubmissionsSummary($first: Int, $after: String, $filter: QuizSubmissionFilter) {
   site {
     quizSubmissions(first: $first, after: $after, filter: $filter) {
       pageInfo {
@@ -68,36 +70,14 @@ final class QuizSubmissions extends Request implements HasBody, HasRequestPagina
           firstName
           lastName
         }
-        userAnswers(first: $answersFirst, after: $answersAfter) {
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          nodes {
-            question {
-              id
-              prompt
-              position
-              type
-            }
-            choices {
-              id
-              text
-              correct
-              position
-            }
-          }
-        }
       }
     }
   }
 }',
             'variables' => [
-                'first'       => $this->per_page,
-                'after'       => $this->after,
-                'filter'      => empty($filter) ? null : $filter,
-                'answersFirst' => $this->answers_per_page,
-                'answersAfter' => $this->answersAfter,
+                'first'  => $this->per_page,
+                'after'  => $this->after,
+                'filter' => empty($filter) ? null : $filter,
             ],
         ];
     }

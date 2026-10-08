@@ -9,6 +9,7 @@ use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizLocation;
 use WooNinja\ThinkificSaloon\GraphQL\DataTransferObjects\Quizzes\QuizSubmission;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizDefinitions;
 use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizSubmissions;
+use WooNinja\ThinkificSaloon\GraphQL\Requests\Quizzes\QuizSubmissionsSummary;
 
 class QuizService extends Resource
 {
@@ -87,6 +88,53 @@ class QuizService extends Resource
     public function submissionsForUsers(array $userIds, int $per_page = 10, int $answers_per_page = 10, ?string $answers_after = null): Paginator
     {
         return $this->submissions(['userIds' => array_values($userIds)], $per_page, $answers_per_page, $answers_after);
+    }
+
+    /**
+     * Return a paginated list of quiz submissions WITHOUT the per-question answers.
+     *
+     * This is the cheap shape of the same connection: it selects only the
+     * submission scalars, quiz and user. Measured cost is ~22 points for 10 rows
+     * versus ~522 for the same page with the userAnswers block (~25x cheaper), so
+     * use it whenever only counts/attempts are needed.
+     *
+     * Because answers are never requested, every returned
+     * QuizSubmission::$userAnswers is [] and $hasMoreAnswers is false. Use the
+     * full submissions()/submissionsForUser()/submissionsForUsers() when
+     * per-question answers are required.
+     *
+     * @param array $filter    Same filter keys as submissions()
+     * @param int   $per_page
+     * @return Paginator
+     */
+    public function submissionsSummary(array $filter = [], int $per_page = 10): Paginator
+    {
+        return (new QuizSubmissionsSummary($filter, $per_page))
+            ->paginate($this->connector);
+    }
+
+    /**
+     * Return the no-answers quiz submissions for a specific user.
+     *
+     * @param int $userId
+     * @param int $per_page
+     * @return Paginator
+     */
+    public function submissionsSummaryForUser(int $userId, int $per_page = 10): Paginator
+    {
+        return $this->submissionsSummary(['userIds' => [$userId]], $per_page);
+    }
+
+    /**
+     * Return the no-answers quiz submissions for several users.
+     *
+     * @param int[] $userIds
+     * @param int   $per_page
+     * @return Paginator
+     */
+    public function submissionsSummaryForUsers(array $userIds, int $per_page = 10): Paginator
+    {
+        return $this->submissionsSummary(['userIds' => array_values($userIds)], $per_page);
     }
 
     /**
