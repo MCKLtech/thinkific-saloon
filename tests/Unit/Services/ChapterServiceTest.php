@@ -50,4 +50,14 @@ class ChapterServiceTest extends TestCase
         $this->assertEquals('Lesson 1', $result[0]->name);
         $this->assertEquals('Lesson 2', $result[1]->name);
     }
+
+    /**
+     * The singular /chapters/{id}/content path answers 404 for every chapter
+     * (verified live); Thinkific's endpoint is /chapters/{id}/contents. The
+     * class-keyed mock above cannot catch a wrong path, so pin it.
+     */
+    public function test_chapter_contents_uses_the_plural_endpoint(): void
+    {
+        $this->assertSame('chapters/5/contents', (new Contents(5))->resolveEndpoint());
+    }
 }

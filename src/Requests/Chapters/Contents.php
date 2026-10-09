@@ -20,7 +20,12 @@ final class Contents extends Request implements Paginatable
 
     public function resolveEndpoint(): string
     {
-        return "chapters/{$this->chapter_id}/content";
+        /**
+         * Plural: Thinkific's endpoint is GET /chapters/{id}/contents. The
+         * singular path answered 404 for every chapter, so no chapter's
+         * lessons were ever returned.
+         */
+        return "chapters/{$this->chapter_id}/contents";
     }
 
     public function createDtoFromResponse(Response $response): array
